@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1Telemetry;
 using F1Telemetry.Models.Raw;
 using F1TelemetryUi.Events;
-using F1TelemetryUi.Views;
 using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Wpf;
-using MahApps.Metro.Controls;
 
 namespace F1TelemetryUi.ViewModels
 {
@@ -53,7 +49,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _kmhMin = 1;
+        private int _kmhMin = 1;
         public int KmhMin
         {
             get
@@ -68,7 +64,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _kmhMax = 360;
+        private int _kmhMax = 360;
         public int KmhMax
         {
             get
@@ -83,7 +79,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _rpmMin = 3000;
+        private int _rpmMin = 3000;
         public int RpmMin
         {
             get
@@ -98,7 +94,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _rpmMax = 14000;
+        private int _rpmMax = 14000;
         public int RpmMax
         {
             get
@@ -113,7 +109,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _gearMin = 1;
+        private int _gearMin = 1;
         public int GearMin
         {
             get
@@ -128,7 +124,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        int _gearMax = 8;
+        private int _gearMax = 8;
         public int GearMax
         {
             get
@@ -143,8 +139,8 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        double _timeMin;
-        public double TimeMin
+        private double? _timeMin = null;
+        public double? TimeMin
         {
             get
             {
@@ -158,8 +154,8 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        double _timeMax;
-        public double TimeMax
+        private double? _timeMax = null;
+        public double? TimeMax
         {
             get
             {
@@ -191,8 +187,6 @@ namespace F1TelemetryUi.ViewModels
         public Func<double, string> Formatter { get; set; }
 
         private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
-
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
 
         public List<F12017TelemetryPacket> TelemetryPackets
         {
@@ -278,7 +272,11 @@ namespace F1TelemetryUi.ViewModels
 
         private void _f1Manager_NewLap(object sender, NewLapEventArgs e)
         {
-            //MapWindow.ClearLine();
+            SeriesCollection[0].Values.Clear();
+            SeriesCollection[1].Values.Clear();
+            SeriesCollection[2].Values.Clear();
+
+            _eventAggregator.PublishOnUIThread(new ClearCanvasEvent());
             if (TelemetryPackets.Count > 1000) // probably more than a thousand to finish a real lap
             {
                 //var serializer = new XmlSerializer(typeof(List<F12017TelemetryPacket>));
@@ -290,6 +288,7 @@ namespace F1TelemetryUi.ViewModels
             }
 
             //Array.Clear(ViewModel.SectorTimes, 0, ViewModel.SectorTimes.Length);
+            NotifyOfPropertyChange(() => SeriesCollection);
         }
 
         private void _f1Manager_PacketReceived(object sender, PacketReceivedEventArgs e)
@@ -343,19 +342,9 @@ namespace F1TelemetryUi.ViewModels
                 {
                     SeriesCollection[2].Values.Add(new TimeSpanValue(e.NewPacket.CurrentLapTime, newGear));
                 }
+
+                NotifyOfPropertyChange(() => SeriesCollection);
             }
         }
-
-        public void ResetZoom()
-        {
-            TimeMin = double.NaN;
-            TimeMax = double.NaN;
-            KmhMin = 1;
-            KmhMax = 360;
-            RpmMin = 3000;
-            RpmMax = 14000;
-            GearMin = 1;
-            GearMax = 8;
-        }        
     }
 }

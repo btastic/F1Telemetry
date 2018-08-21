@@ -19,7 +19,7 @@ namespace F1Telemetry
         private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
         private Thread _captureThread;
         private bool _disposed;
-        private int _port;
+        private readonly int _port;
 
         public TelemetryManager(int port = 20777)
         {
@@ -78,7 +78,7 @@ namespace F1Telemetry
                     {
                         _udpClient.Close();
                     }
-                    catch
+                    catch (Exception ex)
                     {
                     }
                     _captureThread = null;
@@ -92,9 +92,18 @@ namespace F1Telemetry
             while (true)
             {
                 InitUdp(_port);
-                byte[] receiveBytes = _udpClient.Receive(ref _senderIp);
-                var packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
-                HandlePacket(packet);
+                try
+                {
+                    _udpClient.Client.ReceiveTimeout = 5000;
+                    byte[] receiveBytes = _udpClient.Receive(ref _senderIp);
+                    var packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
+                    HandlePacket(packet);
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
+
             }
         }
 

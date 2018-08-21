@@ -13,9 +13,14 @@ using MahApps.Metro.Controls;
 namespace F1TelemetryUi.ViewModels
 {
     [Export(typeof(MapViewModel))]
-    public class MapViewModel : PropertyChangedBase, IShell, IHandle<DrawEvent>, IViewAware
+    public class MapViewModel : 
+        PropertyChangedBase, 
+        IShell, 
+        IHandle<DrawEvent>,
+        IHandle<ClearCanvasEvent>,
+        IViewAware
     {
-        Canvas _mapCanvas;
+        private Canvas _mapCanvas;
         public Canvas MapCanvas
         {
             get
@@ -100,6 +105,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
+        private double _scale = 0.4252238;
         public double Scale
         {
             get
@@ -115,12 +121,10 @@ namespace F1TelemetryUi.ViewModels
 
         public MapView View { get; private set; }
 
-        private double _scale = 0.4252238;
-
         private readonly IWindowManager _windowManager;
         private readonly IEventAggregator _eventAggregator;
 
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
+        public event EventHandler<ViewAttachedEventArgs> ViewAttached = delegate { };
 
         public MapViewModel(
             IWindowManager windowManager,
@@ -199,7 +203,7 @@ namespace F1TelemetryUi.ViewModels
         }
 
         public void AttachView(object view, object context = null)
-        {            
+        {
             if (view is MapView mapView)
             {
                 View = mapView;
@@ -209,12 +213,19 @@ namespace F1TelemetryUi.ViewModels
                 {
                     MapCanvas = canvas;
                 }
+
+                ViewAttached(this, new ViewAttachedEventArgs { Context = context, View = mapView });
             }
         }
 
         public object GetView(object context = null)
         {
             return View;
+        }
+
+        public void Handle(ClearCanvasEvent message)
+        {
+            Points = new PointCollection();
         }
     }
 }
