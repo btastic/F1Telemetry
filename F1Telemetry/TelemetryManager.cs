@@ -19,23 +19,22 @@ namespace F1Telemetry
         private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
         private Thread _captureThread;
         private bool _disposed;
-        private readonly int _port;
+        private int _port;
 
         public TelemetryManager(int port = 20777)
         {
             _port = port;
             InitUdp(port);
+            Enable();
         }
 
         public void Enable()
         {
-            if (_captureThread == null)
+            if (this._captureThread == null)
             {
-                _captureThread = new Thread(new ThreadStart(UdpLoop))
-                {
-                    IsBackground = true
-                };
-                _captureThread.Start();
+                this._captureThread = new Thread(new ThreadStart(this.UdpLoop));
+                this._captureThread.IsBackground = true;
+                this._captureThread.Start();
             }
         }
 
@@ -48,7 +47,7 @@ namespace F1Telemetry
                     _udpClient = new UdpClient();
                     _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                     _udpClient.ExclusiveAddressUse = false;
-                    var localEP = new IPEndPoint(IPAddress.Any, port);
+                    IPEndPoint localEP = new IPEndPoint(IPAddress.Any, port);
                     _udpClient.Client.Bind(localEP);
                 }
             }
@@ -93,16 +92,16 @@ namespace F1Telemetry
             while (true)
             {
                 InitUdp(_port);
-                var receiveBytes = _udpClient.Receive(ref _senderIp);
-                F12017TelemetryPacket packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
+                byte[] receiveBytes = _udpClient.Receive(ref _senderIp);
+                var packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
                 HandlePacket(packet);
             }
         }
 
         public static T ConvertToPacket<T>(byte[] bytes)
         {
-            var gchandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-            var result = (T)Marshal.PtrToStructure(gchandle.AddrOfPinnedObject(), typeof(T));
+            GCHandle gchandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+            T result = (T)Marshal.PtrToStructure(gchandle.AddrOfPinnedObject(), typeof(T));
             gchandle.Free();
             return result;
         }

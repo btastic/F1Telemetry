@@ -27,7 +27,7 @@
             <Button Content="YOffset -" x:Name="DecreaseYOffset"/>
             <ToggleButton Content="Referencing" IsChecked="{Binding Referencing}"/>
         </StackPanel>
-        <paz:ZoomBorder  MaxHeight="1024" MaxWidth="1024" Name="zoomBorder" Stretch="None" ZoomSpeed="1.2" 
+        <paz:ZoomBorder MaxHeight="1024" MaxWidth="1024" Name="zoomBorder" Stretch="None" ZoomSpeed="1.2" 
                         ClipToBounds="True" Focusable="True"
                         Grid.Row="1">
             <Canvas cal:View.Context="MapCanvas" MaxWidth="512" MaxHeight="512" MinWidth="512" MinHeight="512">

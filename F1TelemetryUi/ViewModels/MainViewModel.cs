@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1Telemetry;
 using F1Telemetry.Models.Raw;
 using F1TelemetryUi.Events;
+using F1TelemetryUi.Views;
 using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Wpf;
+using MahApps.Metro.Controls;
 
 namespace F1TelemetryUi.ViewModels
 {
@@ -187,6 +191,9 @@ namespace F1TelemetryUi.ViewModels
         public Func<double, string> Formatter { get; set; }
 
         private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
+
+        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
+
         public List<F12017TelemetryPacket> TelemetryPackets
         {
             get
@@ -215,7 +222,7 @@ namespace F1TelemetryUi.ViewModels
 
             InitGraphSettings();
 
-            _windowManager.ShowWindow(new MapViewModel(_windowManager));
+            _windowManager.ShowWindow(new MapViewModel(_windowManager, _eventAggregator));
         }
 
         private void InitGraphSettings()
@@ -349,6 +356,6 @@ namespace F1TelemetryUi.ViewModels
             RpmMax = 14000;
             GearMin = 1;
             GearMax = 8;
-        }
+        }        
     }
 }

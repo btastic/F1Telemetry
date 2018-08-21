@@ -1,18 +1,33 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1TelemetryUi.Events;
 using F1TelemetryUi.Extensions;
+using F1TelemetryUi.Views;
+using MahApps.Metro.Controls;
 
 namespace F1TelemetryUi.ViewModels
 {
     [Export(typeof(MapViewModel))]
-    public class MapViewModel : PropertyChangedBase, IShell, IHandle<DrawEvent>
+    public class MapViewModel : PropertyChangedBase, IShell, IHandle<DrawEvent>, IViewAware
     {
-        public Canvas MapCanvas { get; set; }
+        Canvas _mapCanvas;
+        public Canvas MapCanvas
+        {
+            get
+            {
+                return _mapCanvas;
+            }
+            set
+            {
+                _mapCanvas = value;
+                NotifyOfPropertyChange();
+            }
+        }
 
         private PointCollection _points = new PointCollection();
         public PointCollection Points
@@ -97,13 +112,24 @@ namespace F1TelemetryUi.ViewModels
                 NotifyOfPropertyChange();
             }
         }
+
+        public MapView View { get; private set; }
+
         private double _scale = 0.4252238;
 
         private readonly IWindowManager _windowManager;
+        private readonly IEventAggregator _eventAggregator;
 
-        public MapViewModel(IWindowManager windowManager)
+        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
+
+        public MapViewModel(
+            IWindowManager windowManager,
+            IEventAggregator eventAggregator)
         {
             _windowManager = windowManager;
+            _eventAggregator = eventAggregator;
+
+            _eventAggregator.Subscribe(this);
         }
 
         public void IncreaseYOffset()
@@ -170,6 +196,25 @@ namespace F1TelemetryUi.ViewModels
 
             _points = pc;
             NotifyOfPropertyChange(() => Points);
+        }
+
+        public void AttachView(object view, object context = null)
+        {            
+            if (view is MapView mapView)
+            {
+                View = mapView;
+
+                Canvas canvas = mapView.FindChildren<Canvas>().FirstOrDefault();
+                if (canvas != null)
+                {
+                    MapCanvas = canvas;
+                }
+            }
+        }
+
+        public object GetView(object context = null)
+        {
+            return View;
         }
     }
 }
