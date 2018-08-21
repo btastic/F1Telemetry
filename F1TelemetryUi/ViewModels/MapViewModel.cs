@@ -202,6 +202,11 @@ namespace F1TelemetryUi.ViewModels
             NotifyOfPropertyChange(() => Points);
         }
 
+        public void Handle(ClearCanvasEvent message)
+        {
+            Points = new PointCollection();
+        }
+
         public void AttachView(object view, object context = null)
         {
             if (view is MapView mapView)
@@ -221,11 +226,6 @@ namespace F1TelemetryUi.ViewModels
         public object GetView(object context = null)
         {
             return View;
-        }
-
-        public void Handle(ClearCanvasEvent message)
-        {
-            Points = new PointCollection();
         }
     }
 }
