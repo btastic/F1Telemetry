@@ -34,10 +34,10 @@ namespace F1Telemetry
 
         public int UpdateInterval { get; }
 
-        public F1Manager(TelemetryManager telemetryManager, int updateInterval)
+        public F1Manager(TelemetryManager telemetryManager)
         {
             _telemetryManager = telemetryManager;
-            UpdateInterval = updateInterval;
+            UpdateInterval = 60;
             _telemetryManager.PacketReceived += _telemetryManager_PacketReceived;
         }
 

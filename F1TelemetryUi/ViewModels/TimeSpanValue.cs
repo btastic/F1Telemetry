@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace F1TelemetryUi
+namespace F1TelemetryUi.ViewModels
 {
-    public class DateModel
+    public class TimeSpanValue
     {
         public TimeSpan TimeSpan { get; set; }
         public double Value { get; set; }
 
-        public DateModel(TimeSpan timeSpan, double value)
+        public TimeSpanValue(TimeSpan timeSpan, double value)
         {
             TimeSpan = timeSpan;
             Value = value;
