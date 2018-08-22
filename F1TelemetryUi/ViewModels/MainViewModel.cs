@@ -279,10 +279,10 @@ namespace F1TelemetryUi.ViewModels
             _eventAggregator.PublishOnUIThread(new ClearCanvasEvent());
             if (TelemetryPackets.Count > 1000) // probably more than a thousand to finish a real lap
             {
-                //var serializer = new XmlSerializer(typeof(List<F12017TelemetryPacket>));
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<F12017TelemetryPacket>));
 
-                //TextWriter writer = new StreamWriter("D:\\temp\\laphungaro.xml");
-                //serializer.Serialize(writer, TelemetryPackets);
+                System.IO.TextWriter writer = new System.IO.StreamWriter("D:\\temp\\laphsilver.xml");
+                serializer.Serialize(writer, TelemetryPackets);
 
                 TelemetryPackets.Clear();
             }

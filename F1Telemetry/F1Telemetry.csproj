@@ -44,6 +44,7 @@
     <Compile Include="Models\F12017DisplayModel.cs" />
     <Compile Include="Models\Raw\CarUDPData.cs" />
     <Compile Include="F1Manager.cs" />
+    <Compile Include="Models\Track.cs" />
     <Compile Include="NewLapEventArgs.cs" />
     <Compile Include="TelemetryManager.cs" />
     <Compile Include="Models\Raw\F12017TelemetryPacket.cs" />
