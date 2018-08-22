@@ -13,24 +13,24 @@
         Title="MapWindow" Height="600" Width="600">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <Button Content="Angle +" x:Name="IncreaseAngle"/>
-            <Button Content="Angle -" x:Name="DecreaseAngle"/>
-            <Button Content="Scale +" x:Name="IncreaseScale"/>
-            <Button Content="Scale -" x:Name="DecreaseScale"/>
-            <Button Content="XOffset +" x:Name="IncreaseXOffset"/>
-            <Button Content="XOffset -" x:Name="DecreaseXOffset"/>
-            <Button Content="YOffset +" x:Name="IncreaseYOffset"/>
-            <Button Content="YOffset -" x:Name="DecreaseYOffset"/>
-            <ToggleButton Content="Referencing" IsChecked="{Binding Referencing}"/>
+            <Button Content="Angle +" x:Name="IncreaseAngle" />
+            <Button Content="Angle -" x:Name="DecreaseAngle" />
+            <Button Content="Scale +" x:Name="IncreaseScale" />
+            <Button Content="Scale -" x:Name="DecreaseScale" />
+            <Button Content="XOffset +" x:Name="IncreaseXOffset" />
+            <Button Content="XOffset -" x:Name="DecreaseXOffset" />
+            <Button Content="YOffset +" x:Name="IncreaseYOffset" />
+            <Button Content="YOffset -" x:Name="DecreaseYOffset" />
+            <ToggleButton Name="ToggleReferencing" Content="Referencing" IsChecked="{Binding ReferenceIsVisible, Mode=OneWay}" />
             <Grid Name="ReferenceIsVisible">
-                <TextBlock Text="{Binding ReferencingString}"/>
+                <TextBlock Text="{Binding ReferencingString}" />
             </Grid>
         </StackPanel>
-        <paz:ZoomBorder MaxHeight="1024" MaxWidth="1024" Name="zoomBorder" Stretch="None" ZoomSpeed="1.2" 
+        <paz:ZoomBorder MaxHeight="1024" MaxWidth="1024" Name="zoomBorder" Stretch="None" ZoomSpeed="1.2"
                         ClipToBounds="True" Focusable="True"
                         Grid.Row="1">
             <Canvas cal:Message.Attach="[Event MouseDown] = [Action MapClick($eventArgs)]" MaxWidth="512" MaxHeight="512" MinWidth="512" MinHeight="512">
