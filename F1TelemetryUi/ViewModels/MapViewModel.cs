@@ -215,9 +215,6 @@ namespace F1TelemetryUi.ViewModels
             Points = new PointCollection();
 
             List<F12017TelemetryPacket> latestTelemetry = GetLatestData();
-            IEnumerable<F12017TelemetryPacket> nextTelemetry = latestTelemetry.Skip(1).Take(1);
-
-            F12017TelemetryPacket oldPacket = latestTelemetry.First();
             F12017TelemetryPacket newPacket;
 
             int i = 0;
@@ -227,10 +224,7 @@ namespace F1TelemetryUi.ViewModels
             foreach (F12017TelemetryPacket item in latestTelemetry.Skip(1))
             {
                 newPacket = item;
-
                 Handle(new DrawEvent(new Point(newPacket.X, newPacket.Z), Brushes.IndianRed));
-
-                oldPacket = newPacket;
                 i++;
             }
         }
@@ -308,6 +302,7 @@ namespace F1TelemetryUi.ViewModels
                     return;
 
                 case ReferencingState.TakingFirstPoint:
+                case ReferencingState.TakingThirdPoint:
                     FirstReferencePoint = mousePosition;
                     MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
                     _referencingStateMachine.Next();
@@ -320,47 +315,41 @@ namespace F1TelemetryUi.ViewModels
                     _referencingStateMachine.Next();
                     return;
 
-                case ReferencingState.TakingThirdPoint:
-                    FirstReferencePoint = mousePosition;
-                    MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
-                    _referencingStateMachine.Next();
-                    return;
-
                 case ReferencingState.TakingFourthPoint:
                     SecondReferencePoint = mousePosition;
                     MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
                     ReferencePointsMap = Tuple.Create(FirstReferencePoint, SecondReferencePoint);
-                    var scale = CalculateScale();
+                    //var scale = CalculateScale();
                     _referencingStateMachine.Disable();
                     NotifyOfPropertyChange(() => Referencing);
                     return;
             }
         }
 
-        private double CalculateScale()
-        {
-            var v1 = (ReferencePointsLine.Item1 - ReferencePointsLine.Item2).Length;
-            var v2 = (ReferencePointsMap.Item1 - ReferencePointsMap.Item2).Length;
-            var difference = ((v2 - v1) / Math.Abs(v1)) * 100;
+        //private double CalculateScale()
+        //{
+        //    var v1 = (ReferencePointsLine.Item1 - ReferencePointsLine.Item2).Length;
+        //    var v2 = (ReferencePointsMap.Item1 - ReferencePointsMap.Item2).Length;
+        //    var difference = ((v2 - v1) / Math.Abs(v1)) * 100;
 
-            return difference;
-        }
+        //    return difference;
+        //}
 
         public void CreateSaveBitmap()
         {
             var height = 1000;
             var width = 1000;
-            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
-             (int)width, (int)height,
+            var renderBitmap = new RenderTargetBitmap(
+             width, height,
              96d, 96d, PixelFormats.Pbgra32);
             // needed otherwise the image output is black
-            MapCanvas.Measure(new Size((int)width, (int)height));
-            MapCanvas.Arrange(new Rect(new Size((int)width, (int)height)));
+            MapCanvas.Measure(new Size(width, height));
+            MapCanvas.Arrange(new Rect(new Size(width, height)));
 
             renderBitmap.Render(MapCanvas);
 
             //JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
 
             using (FileStream file = File.Create(@"D:\temp\canvas.png"))
@@ -384,7 +373,7 @@ namespace F1TelemetryUi.ViewModels
             return latestData;
         }
 
-        private void _referencingStateMachine_StateChanged(object sender, ReferencingStateChangedArgs e)
+        private void _referencingStateMachine_StateChanged(object sender, ReferencingStateChangedEventArgs e)
         {
             NotifyOfPropertyChange(() => ReferencingState);
             NotifyOfPropertyChange(() => Referencing);

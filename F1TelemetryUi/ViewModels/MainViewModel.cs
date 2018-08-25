@@ -17,9 +17,9 @@ namespace F1TelemetryUi.ViewModels
     [Export(typeof(MainViewModel))]
     public class MainViewModel : PropertyChangedBase, IShell
     {
-        public int _sector;
-        public TimeSpan[] _sectorTimes = new TimeSpan[3];
-        public SeriesCollection _seriesCollection;
+        private int _sector;
+        private TimeSpan[] _sectorTimes = new TimeSpan[3];
+        private SeriesCollection _seriesCollection;
         private readonly IEventAggregator _eventAggregator;
         private readonly F1Manager _f1Manager;
         private readonly IWindowManager _windowManager;
@@ -38,15 +38,14 @@ namespace F1TelemetryUi.ViewModels
 
         private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
 
-        private double? _timeMax = null;
+        private double? _timeMax;
 
-        private double? _timeMin = null;
+        private double? _timeMin;
 
         public MainViewModel(
             IWindowManager windowManager,
             IEventAggregator eventAggregator,
-            F1Manager f1Manager,
-            ReferencingStateMachine referencingStateMachine)
+            F1Manager f1Manager)
         {
             _windowManager = windowManager;
             _eventAggregator = eventAggregator;
@@ -201,6 +200,7 @@ namespace F1TelemetryUi.ViewModels
             set
             {
                 _telemetryPackets = value;
+                NotifyOfPropertyChange();
             }
         }
 
@@ -260,9 +260,7 @@ namespace F1TelemetryUi.ViewModels
 
                 TelemetryPackets.Add(telemetryPacket);
 
-                var oldX = e.OldPacket.RawPacket.X;
                 var newX = e.NewPacket.RawPacket.X;
-                var oldY = e.OldPacket.RawPacket.Z;
                 var newY = e.NewPacket.RawPacket.Z;
 
                 _eventAggregator.PublishOnUIThread(new DrawEvent(new Point(newX, newY), Brushes.Blue));

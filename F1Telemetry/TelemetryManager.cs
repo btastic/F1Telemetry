@@ -8,7 +8,7 @@ using F1Telemetry.Models.Raw;
 
 namespace F1Telemetry
 {
-    public class TelemetryManager
+    public class TelemetryManager : IDisposable
     {
         public event EventHandler<PacketReceivedEventArgs> PacketReceived;
 
@@ -30,11 +30,13 @@ namespace F1Telemetry
 
         public void Enable()
         {
-            if (this._captureThread == null)
+            if (_captureThread == null)
             {
-                this._captureThread = new Thread(new ThreadStart(this.UdpLoop));
-                this._captureThread.IsBackground = true;
-                this._captureThread.Start();
+                _captureThread = new Thread(new ThreadStart(UdpLoop))
+                {
+                    IsBackground = true
+                };
+                _captureThread.Start();
             }
         }
 
@@ -78,8 +80,11 @@ namespace F1Telemetry
                     {
                         _udpClient.Close();
                     }
-                    catch (Exception ex)
+#pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
+                    catch (Exception)
+#pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
                     {
+                        // can be ignored
                     }
                     _captureThread = null;
                 }
@@ -99,9 +104,11 @@ namespace F1Telemetry
                     var packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
                     HandlePacket(packet);
                 }
-                catch (Exception ex)
+#pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
+                catch (Exception)
+#pragma warning restore RECS0022 // A catch clause that catches System.Exception and has an empty body
                 {
-                    ;
+                    // can be ignored (timeout etc)
                 }
 
             }
@@ -133,6 +140,11 @@ namespace F1Telemetry
         protected virtual void OnPacketReceived(PacketReceivedEventArgs e)
         {
             PacketReceived?.Invoke(this, e);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
         }
     }
 

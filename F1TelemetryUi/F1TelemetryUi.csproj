@@ -105,6 +105,7 @@
     <Compile Include="Events\ClearCanvasEvent.cs" />
     <Compile Include="Events\DrawEvent.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IShell.cs" />
     <Compile Include="Referencing\ReferencingState.cs" />
     <Compile Include="Referencing\ReferencingStateChangedArgs.cs" />

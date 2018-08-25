@@ -60,12 +60,10 @@ namespace F1TelemetryUi
 
         protected override object GetInstance(Type service, string key)
         {
-            if (!string.IsNullOrWhiteSpace(key))
+            if (!string.IsNullOrWhiteSpace(key) 
+                && Container.TryResolveKeyed(key, service, out object instance))
             {
-                if (Container.TryResolveKeyed(key, service, out object instance))
-                {
-                    return instance;
-                }
+                return instance;
             }
 
             if (Container.IsRegistered(service))

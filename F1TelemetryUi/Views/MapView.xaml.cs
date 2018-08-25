@@ -106,23 +106,11 @@ namespace F1TelemetryUi.Views
         public void DrawLatestTelemetry()
         {
             List<F12017TelemetryPacket> latestTelemetry = GetLatestData();
-            IEnumerable<F12017TelemetryPacket> nextTelemetry = latestTelemetry.Skip(1).Take(1);
-
-            F12017TelemetryPacket oldPacket = latestTelemetry.First();
-            F12017TelemetryPacket newPacket;
-
-            int i = 0;
-
             //MapCanvas.Children.Clear();
 
             foreach (F12017TelemetryPacket item in latestTelemetry.Skip(1))
             {
-                newPacket = item;
-
-                //DrawLine(new Point(newPacket.X, newPacket.Z), Brushes.IndianRed);
-
-                oldPacket = newPacket;
-                i++;
+                //DrawLine(new Point(item.X, item.Z), Brushes.IndianRed);
             }
         }
 

@@ -386,7 +386,7 @@ namespace F1Telemetry.Models.Raw
         /// data for all cars on track
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public CarUDPData[] CarData;
+        public CarUdpData[] CarData;
 
         public float Yaw;
 

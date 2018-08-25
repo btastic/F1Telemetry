@@ -7,7 +7,7 @@ namespace F1TelemetryUi.Referencing
     {
         private ReferencingState _currentState;
 
-        public event EventHandler<ReferencingStateChangedArgs> StateChanged;
+        public event EventHandler<ReferencingStateChangedEventArgs> StateChanged;
 
         public ReferencingState CurrentState
         {
@@ -60,7 +60,7 @@ namespace F1TelemetryUi.Referencing
 
         private void OnStateChanged(ReferencingState oldState, ReferencingState newState)
         {
-            StateChanged?.Invoke(this, new ReferencingStateChangedArgs(oldState, newState));
+            StateChanged?.Invoke(this, new ReferencingStateChangedEventArgs(oldState, newState));
         }
 
         private void SetState(ReferencingState newState)

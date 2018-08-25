@@ -2,9 +2,9 @@
 
 namespace F1TelemetryUi.Referencing
 {
-    public class ReferencingStateChangedArgs : EventArgs
+    public class ReferencingStateChangedEventArgs : EventArgs
     {
-        public ReferencingStateChangedArgs(ReferencingState oldState, ReferencingState newState)
+        public ReferencingStateChangedEventArgs(ReferencingState oldState, ReferencingState newState)
         {
             OldState = oldState;
             NewState = newState;

@@ -3,7 +3,7 @@
 namespace F1Telemetry.Models.Raw
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CarUDPData
+    public struct CarUdpData
     {
         /// <summary>
         /// world co-ordinates of vehicle
