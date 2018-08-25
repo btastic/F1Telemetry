@@ -25,6 +25,8 @@
             <Button Content="XOffset -" x:Name="DecreaseXOffset" />
             <Button Content="YOffset +" x:Name="IncreaseYOffset" />
             <Button Content="YOffset -" x:Name="DecreaseYOffset" />
+            <Button Content="Screenshot" x:Name="CreateSaveBitmap" />
+            
             <ToggleButton Name="ToggleReferencing" Content="Referencing" IsChecked="{Binding ReferenceIsVisible, Mode=OneWay}" />
             <Grid Name="ReferenceIsVisible">
                 <TextBlock Text="{Binding ReferencingString}" />
@@ -38,7 +40,7 @@
                     <ImageBrush x:Name="ImageBrush" AlignmentX="Center" AlignmentY="Center" Stretch="UniformToFill" ImageSource="{Binding Track.MapFileName}">
                     </ImageBrush>
                 </Canvas.Background>
-                <Polyline StrokeThickness="3" Stroke="Red" Points="{Binding Points}"></Polyline>
+                <Polyline StrokeThickness="1" Stroke="Red" Points="{Binding Points}"></Polyline>
             </Canvas>
         </paz:ZoomBorder>
     </Grid>

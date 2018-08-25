@@ -171,8 +171,5 @@
     <Resource Include="Resources\Hungaroring.png" />
     <Resource Include="Resources\Silverstone.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\silverstone.xml" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

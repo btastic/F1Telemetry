@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml.Serialization;
 using Caliburn.Micro;
@@ -197,20 +198,22 @@ namespace F1TelemetryUi.ViewModels
 
         public void DecreaseXOffset()
         {
-            Track.YOffset -= 1;
+            Track.XOffset -= 5;
             NotifyOfPropertyChange(() => Track);
             DrawLatestTelemetry();
         }
 
         public void DecreaseYOffset()
         {
-            Track.YOffset -= 1;
+            Track.YOffset -= 8;
             NotifyOfPropertyChange(() => Track);
             DrawLatestTelemetry();
         }
 
         public void DrawLatestTelemetry()
         {
+            Points = new PointCollection();
+
             List<F12017TelemetryPacket> latestTelemetry = GetLatestData();
             IEnumerable<F12017TelemetryPacket> nextTelemetry = latestTelemetry.Skip(1).Take(1);
 
@@ -279,20 +282,24 @@ namespace F1TelemetryUi.ViewModels
 
         public void IncreaseXOffset()
         {
-            Track.XOffset += 1;
+            Track.XOffset += 5;
             NotifyOfPropertyChange(() => Track);
             DrawLatestTelemetry();
         }
 
         public void IncreaseYOffset()
         {
-            Track.YOffset += 1;
+            Track.YOffset += 5;
             NotifyOfPropertyChange(() => Track);
             DrawLatestTelemetry();
         }
 
         public void MapClick(MouseButtonEventArgs e)
         {
+            if(e.RightButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
             Point mousePosition = Mouse.GetPosition(MapCanvas);
 
             switch (_referencingStateMachine.CurrentState)
@@ -323,9 +330,42 @@ namespace F1TelemetryUi.ViewModels
                     SecondReferencePoint = mousePosition;
                     MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
                     ReferencePointsMap = Tuple.Create(FirstReferencePoint, SecondReferencePoint);
+                    var scale = CalculateScale();
                     _referencingStateMachine.Disable();
                     NotifyOfPropertyChange(() => Referencing);
                     return;
+            }
+        }
+
+        private double CalculateScale()
+        {
+            var v1 = (ReferencePointsLine.Item1 - ReferencePointsLine.Item2).Length;
+            var v2 = (ReferencePointsMap.Item1 - ReferencePointsMap.Item2).Length;
+            var difference = ((v2 - v1) / Math.Abs(v1)) * 100;
+
+            return difference;
+        }
+
+        public void CreateSaveBitmap()
+        {
+            var height = 1000;
+            var width = 1000;
+            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
+             (int)width, (int)height,
+             96d, 96d, PixelFormats.Pbgra32);
+            // needed otherwise the image output is black
+            MapCanvas.Measure(new Size((int)width, (int)height));
+            MapCanvas.Arrange(new Rect(new Size((int)width, (int)height)));
+
+            renderBitmap.Render(MapCanvas);
+
+            //JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+            using (FileStream file = File.Create(@"D:\temp\canvas.png"))
+            {
+                encoder.Save(file);
             }
         }
 
@@ -337,7 +377,7 @@ namespace F1TelemetryUi.ViewModels
 
         private static List<F12017TelemetryPacket> GetLatestData()
         {
-            FileStream FileStream = File.Open(@"C:\development\F1Telemetry\F1TelemetryUi\Resources\silverstone.xml", FileMode.Open);
+            FileStream FileStream = File.Open(@"D:\temp\laphsilver.xml", FileMode.Open);
             var XmlSerializer = new XmlSerializer(typeof(List<F12017TelemetryPacket>));
             var latestData = (List<F12017TelemetryPacket>)XmlSerializer.Deserialize(FileStream);
             FileStream.Close();
@@ -356,8 +396,8 @@ namespace F1TelemetryUi.ViewModels
         {
             var ellipse = new Ellipse
             {
-                Width = 10,
-                Height = 10,
+                Width = 2,
+                Height = 2,
                 Fill = Brushes.Black,
             };
 
@@ -369,7 +409,9 @@ namespace F1TelemetryUi.ViewModels
 
         private void MapViewModel_ViewAttached(object sender, ViewAttachedEventArgs e)
         {
-            //DrawLatestTelemetry();
+            DrawLatestTelemetry();
         }
+
+        
     }
 }

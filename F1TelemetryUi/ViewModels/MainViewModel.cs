@@ -58,7 +58,7 @@ namespace F1TelemetryUi.ViewModels
 
             InitGraphSettings();
 
-            _windowManager.ShowWindow(new MapViewModel(_windowManager, _eventAggregator, referencingStateMachine));
+            //_windowManager.ShowWindow(new MapViewModel(_windowManager, _eventAggregator, referencingStateMachine));
         }
 
         public TimeSpan CurrentLapTime
@@ -241,10 +241,10 @@ namespace F1TelemetryUi.ViewModels
             _eventAggregator.PublishOnUIThread(new ClearCanvasEvent());
             if (TelemetryPackets.Count > 1000) // probably more than a thousand to finish a real lap
             {
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<F12017TelemetryPacket>));
+                //var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<F12017TelemetryPacket>));
 
-                System.IO.TextWriter writer = new System.IO.StreamWriter("D:\\temp\\laphsilver.xml");
-                serializer.Serialize(writer, TelemetryPackets);
+                //System.IO.TextWriter writer = new System.IO.StreamWriter("D:\\temp\\laphsilver.xml");
+                //serializer.Serialize(writer, TelemetryPackets);
 
                 TelemetryPackets.Clear();
             }
@@ -302,6 +302,7 @@ namespace F1TelemetryUi.ViewModels
                 if (newGear != oldGear)
                 {
                     SeriesCollection[2].Values.Add(new TimeSpanValue(e.NewPacket.CurrentLapTime, newGear));
+                    Console.WriteLine(newGear);
                 }
 
                 NotifyOfPropertyChange(() => SeriesCollection);
@@ -347,7 +348,7 @@ namespace F1TelemetryUi.ViewModels
                     Stroke = Brushes.Red,
                     PointGeometrySize = 0,
                     AlternativeStroke = Brushes.Red,
-                    Values = new ChartValues<TimeSpanValue>() { },
+                    Values = new ChartValues<TimeSpanValue>() { },                    
                     ScalesYAt = 2,
                 },
             };

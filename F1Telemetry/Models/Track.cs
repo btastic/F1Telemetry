@@ -34,10 +34,13 @@ namespace F1Telemetry.Models
                     new Track
                     {
                         Name = "Silverstone",
-                        Angle = 80,
+                        Angle = 97,
+                        YOffset = 1073,
+                        XOffset = 1050,
+                        Scale = 0.257612,
                     },
                 };
             }
         }
-    }    
+    }
 }
