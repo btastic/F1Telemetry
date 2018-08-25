@@ -106,6 +106,9 @@
     <Compile Include="Events\DrawEvent.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="IShell.cs" />
+    <Compile Include="Referencing\ReferencingState.cs" />
+    <Compile Include="Referencing\ReferencingStateChangedArgs.cs" />
+    <Compile Include="Referencing\ReferencingStateMachine.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="ViewModels\MapViewModel.cs" />
@@ -165,15 +168,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Silverstone.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Resource Include="Resources\Hungaroring.png" />
+    <Resource Include="Resources\Silverstone.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Hungaroring.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

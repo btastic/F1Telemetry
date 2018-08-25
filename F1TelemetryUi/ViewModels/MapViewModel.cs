@@ -1,32 +1,70 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Xml.Serialization;
 using Caliburn.Micro;
+using F1Telemetry.Models;
+using F1Telemetry.Models.Raw;
 using F1TelemetryUi.Events;
 using F1TelemetryUi.Extensions;
+using F1TelemetryUi.Referencing;
 using F1TelemetryUi.Views;
 using MahApps.Metro.Controls;
 
 namespace F1TelemetryUi.ViewModels
 {
     [Export(typeof(MapViewModel))]
-    public class MapViewModel : 
-        PropertyChangedBase, 
-        IShell, 
+    public class MapViewModel :
+        PropertyChangedBase,
+        IShell,
         IHandle<DrawEvent>,
         IHandle<ClearCanvasEvent>,
         IViewAware
     {
+        private readonly IEventAggregator _eventAggregator;
+        private readonly ReferencingStateMachine _referencingStateMachine;
+        private readonly IWindowManager _windowManager;
         private Canvas _mapCanvas;
+        private PointCollection _points = new PointCollection();
+
+        private bool _referencing;
+
+        private Track _track = Track.Tracks.FirstOrDefault(x => x.Name == "Silverstone");
+
+        public MapViewModel(
+            IWindowManager windowManager,
+            IEventAggregator eventAggregator,
+            ReferencingStateMachine referencingStateMachine)
+        {
+            _windowManager = windowManager;
+            _eventAggregator = eventAggregator;
+            _eventAggregator.Subscribe(this);
+
+            _referencingStateMachine = referencingStateMachine;
+            _referencingStateMachine.StateChanged += _referencingStateMachine_StateChanged;
+
+            ViewAttached += MapViewModel_ViewAttached;
+        }
+
+        public event EventHandler<ViewAttachedEventArgs> ViewAttached = delegate { };
+
+        public Point FirstReferencePoint { get; set; }
+
         public Canvas MapCanvas
         {
             get
             {
                 return _mapCanvas;
             }
+
             set
             {
                 _mapCanvas = value;
@@ -34,7 +72,6 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        private PointCollection _points = new PointCollection();
         public PointCollection Points
         {
             get
@@ -49,163 +86,85 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        private bool _referencing;
+        public bool ReferenceIsVisible
+        {
+            get
+            {
+                return _referencingStateMachine.CurrentState != ReferencingState.Disabled;
+            }
+        }
+
+        public Tuple<Point, Point> ReferencePointsLine { get; set; }
+
+        public Tuple<Point, Point> ReferencePointsMap { get; set; }
+
         public bool Referencing
         {
             get
             {
                 return _referencing;
             }
+
             set
             {
                 _referencing = value;
                 NotifyOfPropertyChange();
+                NotifyOfPropertyChange(() => ReferenceIsVisible);
+                NotifyOfPropertyChange(() => ReferencingString);
             }
         }
 
-        private int _angle = 50;
-        public int Angle
+        public ReferencingState ReferencingState
         {
             get
             {
-                return _angle;
-            }
-            set
-            {
-                _angle = value;
-                NotifyOfPropertyChange();
+                return _referencingStateMachine.CurrentState;
             }
         }
 
-        private int _yOffset = 581;
-        public int YOffset
+        public string ReferencingString
         {
             get
             {
-                return _yOffset;
-            }
-            set
-            {
-                _yOffset = value;
-                NotifyOfPropertyChange();
+                switch (_referencingStateMachine.CurrentState)
+                {
+                    case ReferencingState.Disabled:
+                        return string.Empty;
+
+                    case ReferencingState.TakingFirstPoint:
+                        return "Bitte einen Referenzpunkt auf der Linie klicken";
+
+                    case ReferencingState.TakingSecondPoint:
+                        return "Bitte einen 2. Punkt auf der Linie klicken";
+
+                    case ReferencingState.TakingThirdPoint:
+                        return "Bitte einen Referenzpunkt auf der Karte klicken";
+
+                    case ReferencingState.TakingFourthPoint:
+                        return "Bitte einen 2. Punkt auf der Karte klicken";
+                }
+
+                return string.Empty;
             }
         }
 
-        private int _xOffset = 563;
-        public int XOffset
-        {
-            get
-            {
-                return _xOffset;
-            }
-            set
-            {
-                _xOffset = value;
-                NotifyOfPropertyChange();
-            }
-        }
+        public Point SecondReferencePoint { get; set; }
 
-        private double _scale = 0.4252238;
-        public double Scale
+        public Track Track
         {
             get
             {
-                return _scale;
+                return _track;
             }
+
             set
             {
-                _scale = value;
+                _track = value;
                 NotifyOfPropertyChange();
             }
         }
 
         public MapView View { get; private set; }
-
-        private readonly IWindowManager _windowManager;
-        private readonly IEventAggregator _eventAggregator;
-
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached = delegate { };
-
-        public MapViewModel(
-            IWindowManager windowManager,
-            IEventAggregator eventAggregator)
-        {
-            _windowManager = windowManager;
-            _eventAggregator = eventAggregator;
-
-            _eventAggregator.Subscribe(this);
-        }
-
-        public void IncreaseYOffset()
-        {
-            YOffset += 1;
-        }
-
-        public void DecreaseYOffset()
-        {
-            YOffset -= 1;
-        }
-
-        public void IncreaseXOffset()
-        {
-            XOffset += 1;
-        }
-
-        public void DecreaseXOffset()
-        {
-            YOffset -= 1;
-        }
-
-        public void IncreaseScale()
-        {
-            Scale += .0005;
-        }
-
-        public void DecreaseScale()
-        {
-            Scale -= .0005;
-        }
-
-        public void IncreaseAngle()
-        {
-            Angle += 2;
-        }
-
-        public void DecreaseAngle()
-        {
-            Angle -= 2;
-        }
-
-        public void ToggleReferencing()
-        {
-            Referencing = !Referencing;
-        }
-
-        public void Handle(DrawEvent message)
-        {
-            Point point = message.Point;
-
-            point = MapCanvas.TranslatePoint(point, MapCanvas);
-
-            Point point1 = point.Rotate((float)(Math.PI * Angle / 180));
-
-            point1.Offset(XOffset, YOffset);
-            point1.X = point1.X * Scale;
-            point1.Y = point1.Y * Scale;
-
-            var pc = new PointCollection(_points)
-            {
-                new Point(point1.X, point1.Y)
-            };
-
-            _points = pc;
-            NotifyOfPropertyChange(() => Points);
-        }
-
-        public void Handle(ClearCanvasEvent message)
-        {
-            Points = new PointCollection();
-        }
 
         public void AttachView(object view, object context = null)
         {
@@ -223,9 +182,236 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
+        public void DecreaseAngle()
+        {
+            Track.Angle -= 2;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void DecreaseScale()
+        {
+            Track.Scale -= .0005;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void DecreaseXOffset()
+        {
+            Track.XOffset -= 5;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void DecreaseYOffset()
+        {
+            Track.YOffset -= 8;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void DrawLatestTelemetry()
+        {
+            Points = new PointCollection();
+
+            List<F12017TelemetryPacket> latestTelemetry = GetLatestData();
+            IEnumerable<F12017TelemetryPacket> nextTelemetry = latestTelemetry.Skip(1).Take(1);
+
+            F12017TelemetryPacket oldPacket = latestTelemetry.First();
+            F12017TelemetryPacket newPacket;
+
+            int i = 0;
+
+            //MapCanvas.Children.Clear();
+
+            foreach (F12017TelemetryPacket item in latestTelemetry.Skip(1))
+            {
+                newPacket = item;
+
+                Handle(new DrawEvent(new Point(newPacket.X, newPacket.Z), Brushes.IndianRed));
+
+                oldPacket = newPacket;
+                i++;
+            }
+        }
+
         public object GetView(object context = null)
         {
             return View;
         }
+
+        public void Handle(DrawEvent message)
+        {
+            Point point = message.Point;
+
+            point = MapCanvas.TranslatePoint(point, MapCanvas);
+
+            Point point1 = point.Rotate((float)(Math.PI * Track.Angle / 180));
+
+            point1.Offset(Track.XOffset, Track.YOffset);
+            point1.X = point1.X * Track.Scale;
+            point1.Y = point1.Y * Track.Scale;
+
+            var pc = new PointCollection(_points)
+            {
+                new Point(point1.X, point1.Y)
+            };
+
+            _points = pc;
+            NotifyOfPropertyChange(() => Points);
+        }
+
+        public void Handle(ClearCanvasEvent message)
+        {
+            Points = new PointCollection();
+        }
+
+        public void IncreaseAngle()
+        {
+            Track.Angle += 2;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void IncreaseScale()
+        {
+            Track.Scale += .0005;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void IncreaseXOffset()
+        {
+            Track.XOffset += 5;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void IncreaseYOffset()
+        {
+            Track.YOffset += 5;
+            NotifyOfPropertyChange(() => Track);
+            DrawLatestTelemetry();
+        }
+
+        public void MapClick(MouseButtonEventArgs e)
+        {
+            if(e.RightButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
+            Point mousePosition = Mouse.GetPosition(MapCanvas);
+
+            switch (_referencingStateMachine.CurrentState)
+            {
+                case ReferencingState.Disabled:
+                    return;
+
+                case ReferencingState.TakingFirstPoint:
+                    FirstReferencePoint = mousePosition;
+                    MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
+                    _referencingStateMachine.Next();
+                    return;
+
+                case ReferencingState.TakingSecondPoint:
+                    SecondReferencePoint = mousePosition;
+                    MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
+                    ReferencePointsLine = Tuple.Create(FirstReferencePoint, SecondReferencePoint);
+                    _referencingStateMachine.Next();
+                    return;
+
+                case ReferencingState.TakingThirdPoint:
+                    FirstReferencePoint = mousePosition;
+                    MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
+                    _referencingStateMachine.Next();
+                    return;
+
+                case ReferencingState.TakingFourthPoint:
+                    SecondReferencePoint = mousePosition;
+                    MapCanvas.Children.Add(GetEllipseAtPoint(mousePosition));
+                    ReferencePointsMap = Tuple.Create(FirstReferencePoint, SecondReferencePoint);
+                    var scale = CalculateScale();
+                    _referencingStateMachine.Disable();
+                    NotifyOfPropertyChange(() => Referencing);
+                    return;
+            }
+        }
+
+        private double CalculateScale()
+        {
+            var v1 = (ReferencePointsLine.Item1 - ReferencePointsLine.Item2).Length;
+            var v2 = (ReferencePointsMap.Item1 - ReferencePointsMap.Item2).Length;
+            var difference = ((v2 - v1) / Math.Abs(v1)) * 100;
+
+            return difference;
+        }
+
+        public void CreateSaveBitmap()
+        {
+            var height = 1000;
+            var width = 1000;
+            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
+             (int)width, (int)height,
+             96d, 96d, PixelFormats.Pbgra32);
+            // needed otherwise the image output is black
+            MapCanvas.Measure(new Size((int)width, (int)height));
+            MapCanvas.Arrange(new Rect(new Size((int)width, (int)height)));
+
+            renderBitmap.Render(MapCanvas);
+
+            //JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+            using (FileStream file = File.Create(@"D:\temp\canvas.png"))
+            {
+                encoder.Save(file);
+            }
+        }
+
+        public void ToggleReferencing()
+        {
+            _referencingStateMachine.Toggle();
+            NotifyOfPropertyChange(() => Referencing);
+        }
+
+        private static List<F12017TelemetryPacket> GetLatestData()
+        {
+            FileStream FileStream = File.Open(@"D:\temp\laphsilver.xml", FileMode.Open);
+            var XmlSerializer = new XmlSerializer(typeof(List<F12017TelemetryPacket>));
+            var latestData = (List<F12017TelemetryPacket>)XmlSerializer.Deserialize(FileStream);
+            FileStream.Close();
+            return latestData;
+        }
+
+        private void _referencingStateMachine_StateChanged(object sender, ReferencingStateChangedArgs e)
+        {
+            NotifyOfPropertyChange(() => ReferencingState);
+            NotifyOfPropertyChange(() => Referencing);
+            NotifyOfPropertyChange(() => ReferencingString);
+            NotifyOfPropertyChange(() => ReferenceIsVisible);
+        }
+
+        private Ellipse GetEllipseAtPoint(Point point)
+        {
+            var ellipse = new Ellipse
+            {
+                Width = 2,
+                Height = 2,
+                Fill = Brushes.Black,
+            };
+
+            Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
+            Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
+
+            return ellipse;
+        }
+
+        private void MapViewModel_ViewAttached(object sender, ViewAttachedEventArgs e)
+        {
+            DrawLatestTelemetry();
+        }
+
+        
     }
 }

@@ -134,7 +134,6 @@ namespace F1TelemetryUi.Views
             FileStream.Close();
             return latestData;
         }
-
         //private void Button_Click_2(object sender, RoutedEventArgs e)
         //{
         //    Scale += .0005;

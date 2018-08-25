@@ -28,7 +28,7 @@ namespace F1Telemetry
                     return true;
                 }
 
-                return (DateTimeOffset.Now - _dataLastSend).TotalMilliseconds >= UpdateInterval;
+                return (DateTimeOffset.Now - _dataLastSend).Ticks >= UpdateInterval;
             }
         }
 
