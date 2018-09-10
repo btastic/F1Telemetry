@@ -57,7 +57,7 @@ namespace F1TelemetryUi.ViewModels
 
             InitGraphSettings();
 
-            //_windowManager.ShowWindow(new MapViewModel(_windowManager, _eventAggregator, referencingStateMachine));
+            _windowManager.ShowWindow(new TimingOverlayViewModel(_windowManager, _eventAggregator));
         }
 
         public TimeSpan CurrentLapTime
