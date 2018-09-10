@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
@@ -7,9 +6,9 @@ namespace F1Telemetry.Models.Raw.F12018
     public struct CarStatusData
     {
         /// <summary>
-        /// 0 (off) - 2 (high)
+        /// 0 (off) - 1 (medium) - 2 (high)
         /// </summary>
-        public byte TractionControl;
+        public TractionControl TractionControl;
 
         /// <summary>
         /// 0 (off) - 1 (on)
@@ -19,7 +18,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Fuel mix - 0 = lean, 1 = standard, 2 = rich, 3 = max
         /// </summary>
-        public byte FuelMix;
+        public FuelMix FuelMix;
 
         /// <summary>
         /// Front brake bias (percentage)
@@ -71,7 +70,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// Modern - 0 = hyper soft, 1 = ultra soft
         /// 2 = super soft, 3 = soft, 4 = medium, 5 = hard
         /// 6 = super hard, 7 = inter, 8 = wet
-        /// 
+        ///
         /// Classic - 0-6 = dry, 7-8 = wet
         /// </summary>
         public byte TyreCompound;
@@ -116,7 +115,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// -1 = invalid/unknown, 0 = none, 1 = green
         /// 2 = blue, 3 = yellow, 4 = red
         /// </summary>
-        public sbyte VehicleFiaFlags;
+        public Flag VehicleFiaFlags;
 
         /// <summary>
         /// ERS energy store in Joules
@@ -127,7 +126,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// ERS deployment mode, 0 = none, 1 = low, 2 = medium
         /// 3 = high, 4 = overtake, 5 = hotlap
         /// </summary>
-        public byte ERSDeployMode;
+        public ERSDeployMode ERSDeployMode;
 
         /// <summary>
         /// ERS energy harvested this lap by MGU-K

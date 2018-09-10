@@ -18,6 +18,6 @@ namespace F1Telemetry.Models.Raw.F12018
         /// List of CarSetups
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public CarSetupData CarSetups;
+        public CarSetupData[] CarSetups;
     }
 }

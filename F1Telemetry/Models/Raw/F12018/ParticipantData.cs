@@ -13,12 +13,12 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Driver id - see appendix
         /// </summary>
-        public byte DriverId;
+        public Driver Driver;
 
         /// <summary>
         /// Team id - see appendix
         /// </summary>
-        public byte TeamId;
+        public Team Team;
 
         /// <summary>
         /// Race number of the car
@@ -28,7 +28,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Nationality of the driver
         /// </summary>
-        public byte Nationality;
+        public Nationality Nationality;
 
         /// <summary>
         /// Name of participant in UTF-8 format – null terminated

@@ -1,6 +1,6 @@
-﻿namespace F1Telemetry.Models.F12018
+﻿namespace F1Telemetry.Models.Raw.F12018
 {
-    public enum PacketType
+    public enum PacketType : byte
     {
         Motion = 0,
         Session = 1,

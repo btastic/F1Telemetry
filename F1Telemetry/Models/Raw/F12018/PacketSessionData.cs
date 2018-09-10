@@ -1,12 +1,11 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
     /// <summary>
     /// Frequency: 2 per second
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct PacketSessionData
     {
         /// <summary>
@@ -19,7 +18,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// Weather - 0 = clear, 1 = light cloud, 2 = overcast
         /// 3 = light rain, 4 = heavy rain, 5 = storm
         /// </summary>
-        public byte Weather;
+        public WeatherType WeatherType;
 
         /// <summary>
         /// Track temp. in degrees celsius
@@ -46,17 +45,17 @@ namespace F1Telemetry.Models.Raw.F12018
         /// 5 = Q1, 6 = Q2, 7 = Q3, 8 = Short Q, 9 = OSQ
         /// 10 = R, 11 = R2, 12 = Time Trial
         /// </summary>
-        public byte SessionType;
+        public SessionType SessionType;
 
         /// <summary>
         /// -1 for unknown, 0-21 for tracks
         /// </summary>
-        public sbyte TrackId;
+        public Track TrackId;
 
         /// <summary>
         /// Era, 0 = modern, 1 = classic
         /// </summary>
-        public sbyte Era;
+        public Era Era;
 
         /// <summary>
         /// Time left in session in seconds
@@ -91,7 +90,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// SLI Pro support, 0 = inactive, 1 = active
         /// </summary>
-        public byte SliProNativeSupport;
+        public SliProNativeSupport SliProNativeSupport;
 
         /// <summary>
         /// Number of marshal zones to follow
@@ -102,17 +101,17 @@ namespace F1Telemetry.Models.Raw.F12018
         /// List of marshal zones – max 21
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 21)]
-        public MarshalZone[] MarshalZones;
+        public MarshalZoneData[] MarshalZones;
 
         /// <summary>
         /// 0 = no safety car, 1 = full safety car
         /// 2 = virtual safety car
         /// </summary>
-        public byte SafetyCarStatus;
+        public SafetyCarStatus SafetyCarStatus;
 
         /// <summary>
         /// 0 = offline, 1 = online
         /// </summary>
-        public byte NetworkGame;
+        public NetworkGame NetworkGame;
     }
 }

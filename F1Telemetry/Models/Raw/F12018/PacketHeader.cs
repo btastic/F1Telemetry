@@ -10,7 +10,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// 2018
         /// </summary>
         public ushort PacketFormat;
-        
+
         /// <summary>
         /// Version of this packet type, all start from 1
         /// </summary>
@@ -19,7 +19,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Identifier for the packet type, see below
         /// </summary>
-        public sbyte PacketId;
+        public PacketType PacketType;
 
         /// <summary>
         /// Unique identifier for the session

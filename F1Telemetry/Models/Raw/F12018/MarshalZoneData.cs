@@ -2,8 +2,8 @@
 
 namespace F1Telemetry.Models.Raw.F12018
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MarshalZone
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct MarshalZoneData
     {
         /// <summary>
         /// Fraction (0..1) of way through the lap the marshal zone starts
@@ -13,6 +13,11 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// -1 = invalid/unknown, 0 = none, 1 = green, 2 = blue, 3 = yellow, 4 = red
         /// </summary>
-        public sbyte ZoneFlag;
+        public Flag ZoneFlag;
+
+        public override string ToString()
+        {
+            return $"{ZoneStart} - {ZoneFlag}";
+        }
     }
 }

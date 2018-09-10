@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
@@ -34,7 +33,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Gear selected (1-8, N=0, R=-1)
         /// </summary>
-        public sbyte Gear;
+        public Gear Gear;
 
         /// <summary>
         /// Engine RPM

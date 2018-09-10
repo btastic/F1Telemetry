@@ -42,7 +42,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Models\F12018\PacketType.cs" />
+    <Compile Include="Models\Raw\F12018\Driver.cs" />
+    <Compile Include="Models\Raw\F12018\DriverStatus.cs" />
+    <Compile Include="Models\Raw\F12018\Era.cs" />
+    <Compile Include="Models\Raw\F12018\ERSDeployMode.cs" />
+    <Compile Include="Models\Raw\F12018\Flag.cs" />
+    <Compile Include="Models\Raw\F12018\FuelMix.cs" />
+    <Compile Include="Models\Raw\F12018\Gear.cs" />
+    <Compile Include="Models\Raw\F12018\Nationality.cs" />
+    <Compile Include="Models\Raw\F12018\NetworkGame.cs" />
+    <Compile Include="Models\Raw\F12018\PacketType.cs" />
     <Compile Include="Models\F12017DisplayModel.cs" />
     <Compile Include="Models\Raw\F12017\CarUDPData.cs" />
     <Compile Include="F1Manager.cs" />
@@ -52,7 +61,7 @@
     <Compile Include="Models\Raw\F12018\CarTelemetryData.cs" />
     <Compile Include="Models\Raw\F12018\EventPacket.cs" />
     <Compile Include="Models\Raw\F12018\LapData.cs" />
-    <Compile Include="Models\Raw\F12018\MarshalZone.cs" />
+    <Compile Include="Models\Raw\F12018\MarshalZoneData.cs" />
     <Compile Include="Models\Raw\F12018\PacketCarSetupData.cs" />
     <Compile Include="Models\Raw\F12018\PacketCarStatusData.cs" />
     <Compile Include="Models\Raw\F12018\PacketCarTelemetryData.cs" />
@@ -62,6 +71,16 @@
     <Compile Include="Models\Raw\F12018\PacketParticipantsData.cs" />
     <Compile Include="Models\Raw\F12018\PacketSessionData.cs" />
     <Compile Include="Models\Raw\F12018\ParticipantData.cs" />
+    <Compile Include="Models\Raw\F12018\PitStatus.cs" />
+    <Compile Include="Models\Raw\F12018\ResultStatus.cs" />
+    <Compile Include="Models\Raw\F12018\SafetyCarStatus.cs" />
+    <Compile Include="Models\Raw\F12018\Sector.cs" />
+    <Compile Include="Models\Raw\F12018\SessionType.cs" />
+    <Compile Include="Models\Raw\F12018\SliProNativeSupport.cs" />
+    <Compile Include="Models\Raw\F12018\Team.cs" />
+    <Compile Include="Models\Raw\F12018\Track.cs" />
+    <Compile Include="Models\Raw\F12018\TractionControl.cs" />
+    <Compile Include="Models\Raw\F12018\WeatherType.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="NewLapEventArgs.cs" />
     <Compile Include="TelemetryManager.cs" />

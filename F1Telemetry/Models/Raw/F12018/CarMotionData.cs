@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CarMotionData
     {
         /// <summary>
