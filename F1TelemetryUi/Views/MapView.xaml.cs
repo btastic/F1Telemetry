@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Caliburn.Micro;
-using F1Telemetry.Models.Raw;
+using F1Telemetry.Models.Raw.F12017;
 using MahApps.Metro.Controls;
 
 namespace F1TelemetryUi.Views

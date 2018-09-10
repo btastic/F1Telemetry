@@ -4,7 +4,9 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using F1Telemetry.Models;
-using F1Telemetry.Models.Raw;
+using F1Telemetry.Models.F12018;
+using F1Telemetry.Models.Raw.F12017;
+using F1Telemetry.Models.Raw.F12018;
 
 namespace F1Telemetry
 {
@@ -101,8 +103,12 @@ namespace F1Telemetry
                 {
                     _udpClient.Client.ReceiveTimeout = 5000;
                     byte[] receiveBytes = _udpClient.Receive(ref _senderIp);
-                    var packet = ConvertToPacket<F12017TelemetryPacket>(receiveBytes);
-                    HandlePacket(packet);
+                    var packet = ConvertToPacket<PacketHeader>(receiveBytes);
+                    if ((PacketType)packet.PacketId == PacketType.Session)
+                    {
+                        ;
+                    }
+                    //HandlePacket(packet);
                 }
 #pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
                 catch (Exception)

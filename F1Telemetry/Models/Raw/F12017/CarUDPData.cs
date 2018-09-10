@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace F1Telemetry.Models.Raw
+namespace F1Telemetry.Models.Raw.F2017
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CarUdpData

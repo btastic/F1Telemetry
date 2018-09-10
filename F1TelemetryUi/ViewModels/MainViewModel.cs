@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1Telemetry;
-using F1Telemetry.Models.Raw;
+using F1Telemetry.Models.Raw.F12017;
 using F1TelemetryUi.Events;
 using F1TelemetryUi.Referencing;
 using LiveCharts;

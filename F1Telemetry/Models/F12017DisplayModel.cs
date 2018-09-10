@@ -1,5 +1,5 @@
 ﻿using System;
-using F1Telemetry.Models.Raw;
+using F1Telemetry.Models.Raw.F12017;
 
 namespace F1Telemetry.Models
 {

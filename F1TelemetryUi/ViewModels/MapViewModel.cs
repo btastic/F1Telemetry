@@ -12,7 +12,7 @@ using System.Windows.Shapes;
 using System.Xml.Serialization;
 using Caliburn.Micro;
 using F1Telemetry.Models;
-using F1Telemetry.Models.Raw;
+using F1Telemetry.Models.Raw.F12017;
 using F1TelemetryUi.Events;
 using F1TelemetryUi.Extensions;
 using F1TelemetryUi.Referencing;

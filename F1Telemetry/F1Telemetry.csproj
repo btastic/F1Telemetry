@@ -42,14 +42,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\F12018\PacketType.cs" />
     <Compile Include="Models\F12017DisplayModel.cs" />
-    <Compile Include="Models\Raw\CarUDPData.cs" />
+    <Compile Include="Models\Raw\F12017\CarUDPData.cs" />
     <Compile Include="F1Manager.cs" />
+    <Compile Include="Models\Raw\F12018\CarMotionData.cs" />
+    <Compile Include="Models\Raw\F12018\CarSetupData.cs" />
+    <Compile Include="Models\Raw\F12018\CarStatusData.cs" />
+    <Compile Include="Models\Raw\F12018\CarTelemetryData.cs" />
+    <Compile Include="Models\Raw\F12018\EventPacket.cs" />
+    <Compile Include="Models\Raw\F12018\LapData.cs" />
+    <Compile Include="Models\Raw\F12018\MarshalZone.cs" />
+    <Compile Include="Models\Raw\F12018\PacketCarSetupData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketCarStatusData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketCarTelemetryData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketLapData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketMotionData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketHeader.cs" />
+    <Compile Include="Models\Raw\F12018\PacketParticipantsData.cs" />
+    <Compile Include="Models\Raw\F12018\PacketSessionData.cs" />
+    <Compile Include="Models\Raw\F12018\ParticipantData.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="NewLapEventArgs.cs" />
     <Compile Include="TelemetryManager.cs" />
-    <Compile Include="Models\Raw\F12017TelemetryPacket.cs" />
+    <Compile Include="Models\Raw\F12017\F12017TelemetryPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

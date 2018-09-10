@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using F1Telemetry.Models.Raw.F2017;
 
-namespace F1Telemetry.Models.Raw
+namespace F1Telemetry.Models.Raw.F12017
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct F12017TelemetryPacket
