@@ -3,27 +3,39 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
-using F1Telemetry.Models;
 using F1Telemetry.Models.Raw.F12018;
 
 namespace F1Telemetry
 {
-    public class PacketReceivedEventArgs : EventArgs
+    public class PacketReceivedEventArgs<T> : EventArgs
     {
-        public F12017DisplayModel NewPacket { get; set; }
-        public F12017DisplayModel OldPacket { get; set; }
+        public PacketReceivedEventArgs(T oldPacket, T packet)
+        {
+            OldPacket = oldPacket;
+            Packet = packet;
+        }
+
+        public T OldPacket { get; set; }
+        public T Packet { get; set; }
     }
 
     public class TelemetryManager : IDisposable
     {
         private readonly int _port;
-
         private Thread _captureThread;
-
         private bool _disposed;
 
-        private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
+        private PacketCarSetupData _oldCarSetupData;
+        private PacketCarStatusData _oldCarStatusData;
+        private PacketCarTelemetryData _oldCarTelemetryData;
+        private EventPacket _oldEventPacket;
+        private PacketLapData _oldLapData;
+        private PacketMotionData _oldMotionData;
+        private PacketParticipantsData _oldParticipantsData;
+        private PacketSessionData _oldSessionData;
+        private UInt64 _oldSessionId;
 
+        private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
         private UdpClient _udpClient;
 
         public TelemetryManager(int port = 20777)
@@ -33,10 +45,23 @@ namespace F1Telemetry
             Enable();
         }
 
-        public event EventHandler<PacketReceivedEventArgs> PacketReceived;
+        public event EventHandler<PacketReceivedEventArgs<PacketCarSetupData>> CarSetupPacketReceived;
 
-        public PacketHeader NewPacket { get; set; }
-        public PacketHeader OldPacket { get; set; }
+        public event EventHandler<PacketReceivedEventArgs<PacketCarStatusData>> CarStatusPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketCarTelemetryData>> CarTelemetryPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<EventPacket>> EventPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketLapData>> LapPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketMotionData>> MotionPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketParticipantsData>> ParticipantsPacketReceived;
+
+        public event EventHandler<EventArgs> SessionChanged;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionPacketReceived;
 
         public static T ConvertToPacket<T>(byte[] bytes)
         {
@@ -96,59 +121,115 @@ namespace F1Telemetry
             _disposed = true;
         }
 
-        protected virtual void OnPacketReceived(PacketReceivedEventArgs e)
+        protected virtual void OnCarSetupPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
         {
-            PacketReceived?.Invoke(this, e);
+            CarSetupPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnCarStatusPacketReceived(PacketReceivedEventArgs<PacketCarStatusData> e)
+        {
+            CarStatusPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnCarTelemetryPacketReceived(PacketReceivedEventArgs<PacketCarTelemetryData> e)
+        {
+            CarTelemetryPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnEventPacketReceived(PacketReceivedEventArgs<EventPacket> e)
+        {
+            EventPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnLapPacketReceivedReceived(PacketReceivedEventArgs<PacketLapData> e)
+        {
+            LapPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnMotionPacketReceived(PacketReceivedEventArgs<PacketMotionData> e)
+        {
+            MotionPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
+        {
+            CarSetupPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            ParticipantsPacketReceived?.Invoke(this, e);
+        }
+
+        protected virtual void OnSessionChanged(EventArgs e)
+        {
+            SessionChanged?.Invoke(this, e);
+        }
+
+        protected virtual void OnSessionPacketReceived(PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            SessionPacketReceived?.Invoke(this, e);
         }
 
         private void HandlePacket(PacketHeader packet, byte[] bytes)
         {
-            NewPacket = packet;
+            if (_oldSessionId != 0 && packet.SessionUId != _oldSessionId)
+            {
+                OnSessionChanged(new EventArgs());
+            }
 
             switch (packet.PacketType)
             {
                 case PacketType.Motion:
                     var motionPacket = ConvertToPacket<PacketMotionData>(bytes);
+                    OnMotionPacketReceived(new PacketReceivedEventArgs<PacketMotionData>(_oldMotionData, motionPacket));
+                    _oldMotionData = motionPacket;
                     break;
 
                 case PacketType.Session:
                     var sessionPacket = ConvertToPacket<PacketSessionData>(bytes);
+                    OnSessionPacketReceived(new PacketReceivedEventArgs<PacketSessionData>(_oldSessionData, sessionPacket));
+                    _oldSessionData = sessionPacket;
                     break;
 
                 case PacketType.LapData:
                     var lapPacket = ConvertToPacket<PacketLapData>(bytes);
+                    OnLapPacketReceivedReceived(new PacketReceivedEventArgs<PacketLapData>(_oldLapData, lapPacket));
+                    _oldLapData = lapPacket;
                     break;
 
                 case PacketType.Event:
                     var eventPacket = ConvertToPacket<EventPacket>(bytes);
+                    OnEventPacketReceived(new PacketReceivedEventArgs<EventPacket>(_oldEventPacket, eventPacket));
+                    _oldEventPacket = eventPacket;
                     break;
 
                 case PacketType.Participants:
                     var participantPacket = ConvertToPacket<PacketParticipantsData>(bytes);
+                    OnParticipantsPacketReceived(new PacketReceivedEventArgs<PacketParticipantsData>(_oldParticipantsData, participantPacket));
+                    _oldParticipantsData = participantPacket;
                     break;
 
                 case PacketType.CarSetups:
-                    var carSetupPacket = ConvertToPacket<PacketCarSetupData>(bytes);
+                    var carSetupsPacket = ConvertToPacket<PacketCarSetupData>(bytes);
+                    OnCarSetupPacketReceived(new PacketReceivedEventArgs<PacketCarSetupData>(_oldCarSetupData, carSetupsPacket));
+                    _oldCarSetupData = carSetupsPacket;
                     break;
 
                 case PacketType.CarTelemetry:
                     var carTelemetryPacket = ConvertToPacket<PacketCarTelemetryData>(bytes);
+                    OnCarTelemetryPacketReceived(new PacketReceivedEventArgs<PacketCarTelemetryData>(_oldCarTelemetryData, carTelemetryPacket));
+                    _oldCarTelemetryData = carTelemetryPacket;
                     break;
 
                 case PacketType.CarStatus:
                     var carStatusPacket = ConvertToPacket<PacketCarStatusData>(bytes);
+                    OnCarStatusPacketReceived(new PacketReceivedEventArgs<PacketCarStatusData>(_oldCarStatusData, carStatusPacket));
+                    _oldCarStatusData = carStatusPacket;
                     break;
             }
 
-            //var args = new PacketReceivedEventArgs
-            //{
-            //    NewPacket = new F12017DisplayModel(NewPacket),
-            //    OldPacket = new F12017DisplayModel(OldPacket)
-            //};
-
-            //OnPacketReceived(args);
-
-            OldPacket = packet;
+            _oldSessionId = packet.SessionUId;
         }
 
         private void InitUdp(int port)

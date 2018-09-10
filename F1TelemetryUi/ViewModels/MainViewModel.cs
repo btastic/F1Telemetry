@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Windows;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1Telemetry;
 using F1Telemetry.Models.Raw.F12017;
+using F1Telemetry.Models.Raw.F12018;
 using F1TelemetryUi.Events;
-using F1TelemetryUi.Referencing;
 using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Wpf;
@@ -17,25 +16,19 @@ namespace F1TelemetryUi.ViewModels
     [Export(typeof(MainViewModel))]
     public class MainViewModel : PropertyChangedBase, IShell
     {
-        private int _sector;
-        private TimeSpan[] _sectorTimes = new TimeSpan[3];
-        private SeriesCollection _seriesCollection;
         private readonly IEventAggregator _eventAggregator;
         private readonly F1Manager _f1Manager;
         private readonly IWindowManager _windowManager;
         private TimeSpan _currentLapTime;
         private int _gearMax = 8;
-
         private int _gearMin = 1;
-
         private int _kmhMax = 360;
-
         private int _kmhMin = 1;
-
         private int _rpmMax = 14000;
-
         private int _rpmMin = 3000;
-
+        private int _sector;
+        private TimeSpan[] _sectorTimes = new TimeSpan[3];
+        private SeriesCollection _seriesCollection;
         private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
 
         private double? _timeMax;
@@ -51,8 +44,12 @@ namespace F1TelemetryUi.ViewModels
             _eventAggregator = eventAggregator;
 
             _f1Manager = f1Manager;
-            _f1Manager.PacketReceived += _f1Manager_PacketReceived;
             _f1Manager.NewLap += _f1Manager_NewLap;
+            _f1Manager.LapPacketReceived += _f1Manager_LapPacketReceived;
+            _f1Manager.CarTelemetryReceived += _f1Manager_CarTelemetryReceived;
+            _f1Manager.SessionChanged += _f1Manager_SessionChanged;
+            _f1Manager.CarStatusReceived += _f1Manager_CarStatusReceived;
+
             _f1Manager.Start();
 
             InitGraphSettings();
@@ -232,6 +229,44 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
+        private void _f1Manager_CarStatusReceived(object sender, PacketReceivedEventArgs<CarStatusData> e)
+        {
+            GearMax = e.Packet.MaxGears;
+            RpmMax = e.Packet.MaxRpm;
+            RpmMin = e.Packet.IdleRpm;
+        }
+
+        private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<CarTelemetryData> e)
+        {
+            if (!e.OldPacket.Equals(default(CarTelemetryData)) && !e.Packet.Equals(default(CarTelemetryData)))
+            {
+                if (Math.Abs(e.Packet.Speed - e.OldPacket.Speed) > 0.1f)
+                {
+                    SeriesCollection[0].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.Speed));
+                }
+
+                if (Math.Abs(e.Packet.EngineRpm - e.OldPacket.EngineRpm) > 1f)
+                {
+                    SeriesCollection[1].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.EngineRpm));
+                }
+
+                if (e.Packet.Gear != e.OldPacket.Gear)
+                {
+                    SeriesCollection[2].Values.Add(new TimeSpanValue(CurrentLapTime, (int)e.Packet.Gear));
+                }
+
+                NotifyOfPropertyChange(() => SeriesCollection);
+            }
+        }
+
+        private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<LapData> e)
+        {
+            if (!e.OldPacket.Equals(default(LapData)) && !e.Packet.Equals(default(LapData)))
+            {
+                CurrentLapTime = TimeSpan.FromSeconds(e.Packet.CurrentLapTime);
+            }
+        }
+
         private void _f1Manager_NewLap(object sender, NewLapEventArgs e)
         {
             SeriesCollection[0].Values.Clear();
@@ -252,59 +287,14 @@ namespace F1TelemetryUi.ViewModels
             NotifyOfPropertyChange(() => SeriesCollection);
         }
 
-        private void _f1Manager_PacketReceived(object sender, PacketReceivedEventArgs e)
+        private void _f1Manager_SessionChanged(object sender, EventArgs e)
         {
-            if (e.OldPacket != null && e.NewPacket != null)
-            {
-                F12017TelemetryPacket telemetryPacket = e.NewPacket.RawPacket;
+            SeriesCollection[0].Values.Clear();
+            SeriesCollection[1].Values.Clear();
+            SeriesCollection[2].Values.Clear();
+            TelemetryPackets.Clear();
 
-                TelemetryPackets.Add(telemetryPacket);
-
-                var newX = e.NewPacket.RawPacket.X;
-                var newY = e.NewPacket.RawPacket.Z;
-
-                _eventAggregator.PublishOnUIThread(new DrawEvent(new Point(newX, newY), Brushes.Blue));
-
-                CurrentLapTime = e.NewPacket.CurrentLapTime;
-
-                //ViewModel.Sector = e.NewPacket.CurrentSectorIndex;
-
-                //if (e.NewPacket.CurrentSectorIndex != e.OldPacket.CurrentSectorIndex)
-                //{
-                //    ViewModel.SectorTimes[e.OldPacket.CurrentSectorIndex] = e.NewPacket.CurrentLapTime - ViewModel.SectorTimes[ViewModel.Sector - 1];
-                //}
-
-                if (Math.Abs(e.NewPacket.SpeedKmh - e.OldPacket.SpeedKmh) > 0.1f)
-                {
-                    SeriesCollection[0].Values.Add(new TimeSpanValue(e.NewPacket.CurrentLapTime, e.OldPacket.SpeedKmh));
-                }
-
-                if (Math.Abs(e.NewPacket.Rpms - e.OldPacket.Rpms) > 1f)
-                {
-                    SeriesCollection[1].Values.Add(new TimeSpanValue(e.NewPacket.CurrentLapTime, e.NewPacket.Rpms));
-                }
-
-                int newGear = 0;
-                int oldGear = 0;
-
-                if (e.NewPacket.Gear != "N" && e.NewPacket.Gear != "R")
-                {
-                    newGear = int.Parse(e.NewPacket.Gear);
-                }
-
-                if (e.OldPacket.Gear != "N" && e.OldPacket.Gear != "R")
-                {
-                    oldGear = int.Parse(e.OldPacket.Gear);
-                }
-
-                if (newGear != oldGear)
-                {
-                    SeriesCollection[2].Values.Add(new TimeSpanValue(e.NewPacket.CurrentLapTime, newGear));
-                    Console.WriteLine(newGear);
-                }
-
-                NotifyOfPropertyChange(() => SeriesCollection);
-            }
+            NotifyOfPropertyChange(() => SeriesCollection);
         }
 
         private void InitGraphSettings()
@@ -346,7 +336,7 @@ namespace F1TelemetryUi.ViewModels
                     Stroke = Brushes.Red,
                     PointGeometrySize = 0,
                     AlternativeStroke = Brushes.Red,
-                    Values = new ChartValues<TimeSpanValue>() { },                    
+                    Values = new ChartValues<TimeSpanValue>() { },
                     ScalesYAt = 2,
                 },
             };
