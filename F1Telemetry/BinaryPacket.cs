@@ -21,10 +21,5 @@ namespace F1Telemetry
             Data = data;
             TimeSpan = timeSpan;
         }
-
-        internal object First()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
