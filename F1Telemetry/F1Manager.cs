@@ -9,7 +9,7 @@ namespace F1Telemetry
 
         private DateTimeOffset _dataLastReceived;
 
-        private DateTimeOffset _dataLastSend = DateTimeOffset.MinValue;
+        private readonly DateTimeOffset _dataLastSend = DateTimeOffset.MinValue;
 
         public F1Manager(TelemetryManager telemetryManager)
         {
@@ -25,11 +25,11 @@ namespace F1Telemetry
             _telemetryManager.SessionChanged += _telemetryManager_SessionChanged;
         }
 
-        public event EventHandler<PacketReceivedEventArgs<CarStatusData>> CarStatusReceived;
+        public event EventHandler<PacketReceivedEventArgs<PacketCarStatusData>> CarStatusReceived;
 
-        public event EventHandler<PacketReceivedEventArgs<CarTelemetryData>> CarTelemetryReceived;
+        public event EventHandler<PacketReceivedEventArgs<PacketCarTelemetryData>> CarTelemetryReceived;
 
-        public event EventHandler<PacketReceivedEventArgs<LapData>> LapPacketReceived;
+        public event EventHandler<PacketReceivedEventArgs<PacketLapData>> LapPacketReceived;
 
         public event EventHandler<NewLapEventArgs> NewLap;
 
@@ -63,7 +63,7 @@ namespace F1Telemetry
             _telemetryManager.Enable();
         }
 
-        protected virtual void OnLapPacketReceived(PacketReceivedEventArgs<LapData> e)
+        protected virtual void OnLapPacketReceived(PacketReceivedEventArgs<PacketLapData> e)
         {
             LapPacketReceived?.Invoke(this, e);
         }
@@ -81,11 +81,8 @@ namespace F1Telemetry
             }
 
             _dataLastReceived = DateTimeOffset.Now;
-
-            var oldCarStatusData = e.Packet.CarStatusData[e.Packet.Header.PlayerCarIndex];
-            var carStatusData = e.OldPacket.CarStatusData[e.Packet.Header.PlayerCarIndex];
-
-            OnCarStatusReceived(oldCarStatusData, carStatusData);
+                    
+            OnCarStatusReceived(e.Packet, e.OldPacket);
         }
 
         private void _telemetryManager_CarTelemetryPacketReceived(object sender, PacketReceivedEventArgs<PacketCarTelemetryData> e)
@@ -97,14 +94,16 @@ namespace F1Telemetry
 
             _dataLastReceived = DateTimeOffset.Now;
 
-            var playerCarTelemetry = e.Packet.CarTelemetryData[e.Packet.Header.PlayerCarIndex];
-            var oldPlayerCarTelemetry = e.OldPacket.CarTelemetryData[e.Packet.Header.PlayerCarIndex];
-
-            OnCarTelemetryReceived(oldPlayerCarTelemetry, playerCarTelemetry);
+            OnCarTelemetryReceived(e.Packet, e.OldPacket);
         }
 
         private void _telemetryManager_EventPacketReceived(object sender, PacketReceivedEventArgs<EventPacket> e)
         {
+            if (e.OldPacket.Equals(default(EventPacket)))
+            {
+                return;
+            }
+
             _dataLastReceived = DateTimeOffset.Now;
         }
 
@@ -114,17 +113,20 @@ namespace F1Telemetry
             {
                 return;
             }
-
+            
             _dataLastReceived = DateTimeOffset.Now;
-            var playerLapData = e.Packet.LapData[e.Packet.Header.PlayerCarIndex];
-            var oldPlayerLapData = e.OldPacket.LapData[e.Packet.Header.PlayerCarIndex];
 
             CheckLapChanged(e);
-            OnLapPacketReceived(new PacketReceivedEventArgs<LapData>(oldPlayerLapData, playerLapData));
+            OnLapPacketReceived(new PacketReceivedEventArgs<PacketLapData>(e.Packet, e.OldPacket));
         }
 
         private void _telemetryManager_ParticipantsPacketReceived(object sender, PacketReceivedEventArgs<PacketParticipantsData> e)
         {
+            if (e.OldPacket.Equals(default(PacketParticipantsData)))
+            {
+                return;
+            }
+
             _dataLastReceived = DateTimeOffset.Now;
         }
 
@@ -135,6 +137,11 @@ namespace F1Telemetry
 
         private void _telemetryManager_SessionPacketReceived(object sender, PacketReceivedEventArgs<PacketSessionData> e)
         {
+            if (e.OldPacket.Equals(default(PacketSessionData)))
+            {
+                return;
+            }
+
             _dataLastReceived = DateTimeOffset.Now;
         }
 
@@ -149,14 +156,14 @@ namespace F1Telemetry
             }
         }
 
-        private void OnCarStatusReceived(CarStatusData oldCarStatusData, CarStatusData newCarStatusData)
+        private void OnCarStatusReceived(PacketCarStatusData oldCarStatusData, PacketCarStatusData newCarStatusData)
         {
-            CarStatusReceived?.Invoke(this, new PacketReceivedEventArgs<CarStatusData>(oldCarStatusData, newCarStatusData));
+            CarStatusReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarStatusData>(oldCarStatusData, newCarStatusData));
         }
 
-        private void OnCarTelemetryReceived(CarTelemetryData oldCarTelemetryData, CarTelemetryData newCarTelemetryData)
+        private void OnCarTelemetryReceived(PacketCarTelemetryData oldCarTelemetryData, PacketCarTelemetryData newCarTelemetryData)
         {
-            CarTelemetryReceived?.Invoke(this, new PacketReceivedEventArgs<CarTelemetryData>(oldCarTelemetryData, newCarTelemetryData));
+            CarTelemetryReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarTelemetryData>(oldCarTelemetryData, newCarTelemetryData));
         }
 
         private void OnNewLap(int lastLap, int currentLap)

@@ -54,7 +54,7 @@ namespace F1TelemetryUi.ViewModels
 
             InitGraphSettings();
 
-            _windowManager.ShowWindow(new TimingOverlayViewModel(_windowManager, _eventAggregator));
+            _windowManager.ShowWindow(new TimingOverlayViewModel(_windowManager, _eventAggregator, _f1Manager));
         }
 
         public TimeSpan CurrentLapTime
@@ -229,41 +229,41 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        private void _f1Manager_CarStatusReceived(object sender, PacketReceivedEventArgs<CarStatusData> e)
+        private void _f1Manager_CarStatusReceived(object sender, PacketReceivedEventArgs<PacketCarStatusData> e)
         {
-            GearMax = e.Packet.MaxGears - 1;
-            RpmMax = e.Packet.MaxRpm;
-            RpmMin = e.Packet.IdleRpm;
+            GearMax = e.Packet.GetPlayerLapData().MaxGears - 1;
+            RpmMax = e.Packet.GetPlayerLapData().MaxRpm;
+            RpmMin = e.Packet.GetPlayerLapData().IdleRpm;
         }
 
-        private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<CarTelemetryData> e)
+        private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<PacketCarTelemetryData> e)
         {
-            if (!e.OldPacket.Equals(default(CarTelemetryData)) && !e.Packet.Equals(default(CarTelemetryData)))
+            if (!e.OldPacket.Equals(default(PacketCarTelemetryData)) && !e.Packet.Equals(default(PacketCarTelemetryData)))
             {
-                if (Math.Abs(e.Packet.Speed - e.OldPacket.Speed) > 0.1f)
+                if (Math.Abs(e.Packet.GetPlayerLapData().Speed - e.OldPacket.GetPlayerLapData().Speed) > 0.1f)
                 {
-                    SeriesCollection[0].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.Speed));
+                    SeriesCollection[0].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.GetPlayerLapData().Speed));
                 }
 
-                if (Math.Abs(e.Packet.EngineRpm - e.OldPacket.EngineRpm) > 1f)
+                if (Math.Abs(e.Packet.GetPlayerLapData().EngineRpm - e.OldPacket.GetPlayerLapData().EngineRpm) > 1f)
                 {
-                    SeriesCollection[1].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.EngineRpm));
+                    SeriesCollection[1].Values.Add(new TimeSpanValue(CurrentLapTime, e.Packet.GetPlayerLapData().EngineRpm));
                 }
 
-                if (e.Packet.Gear != e.OldPacket.Gear)
+                if (e.Packet.GetPlayerLapData().Gear != e.OldPacket.GetPlayerLapData().Gear)
                 {
-                    SeriesCollection[2].Values.Add(new TimeSpanValue(CurrentLapTime, (int)e.Packet.Gear));
+                    SeriesCollection[2].Values.Add(new TimeSpanValue(CurrentLapTime, (int)e.Packet.GetPlayerLapData().Gear));
                 }
 
                 NotifyOfPropertyChange(() => SeriesCollection);
             }
         }
 
-        private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<LapData> e)
+        private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<PacketLapData> e)
         {
-            if (!e.OldPacket.Equals(default(LapData)) && !e.Packet.Equals(default(LapData)))
+            if (!e.OldPacket.Equals(default(PacketLapData)) && !e.Packet.Equals(default(PacketLapData)))
             {
-                CurrentLapTime = TimeSpan.FromSeconds(e.Packet.CurrentLapTime);
+                CurrentLapTime = TimeSpan.FromSeconds(e.Packet.GetPlayerLapData().CurrentLapTime);
             }
         }
 

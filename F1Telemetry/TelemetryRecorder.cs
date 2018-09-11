@@ -17,7 +17,7 @@ namespace F1Telemetry
         private CancellationTokenSource _cts;
 
         private ConcurrentBag<BinaryPacket> _packetsToProcess = new ConcurrentBag<BinaryPacket>();
-        private ConcurrentQueue<BinaryPacket> _queue = new ConcurrentQueue<BinaryPacket>();
+        private readonly ConcurrentQueue<BinaryPacket> _queue = new ConcurrentQueue<BinaryPacket>();
 
         public TelemetryRecorder(string fileFolder = null)
         {

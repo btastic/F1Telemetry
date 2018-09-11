@@ -30,4 +30,12 @@ namespace F1Telemetry.Models.Raw.F12018
         /// </summary>
         public UInt32 ButtonStatus;
     }
+
+    public static class PacketCarTelemetryDataExtensions
+    {
+        public static CarTelemetryData GetPlayerLapData(this PacketCarTelemetryData packetCarTelemetryData)
+        {
+            return packetCarTelemetryData.CarTelemetryData[packetCarTelemetryData.Header.PlayerCarIndex];
+        }
+    }
 }

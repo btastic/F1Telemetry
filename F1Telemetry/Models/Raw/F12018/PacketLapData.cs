@@ -22,4 +22,12 @@ namespace F1Telemetry.Models.Raw.F12018
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public LapData[] LapData;
     }
+
+    public static class PacketLapDataExtensions
+    {
+        public static LapData GetPlayerLapData(this PacketLapData packetLapData)
+        {
+            return packetLapData.LapData[packetLapData.Header.PlayerCarIndex];
+        }
+    }
 }

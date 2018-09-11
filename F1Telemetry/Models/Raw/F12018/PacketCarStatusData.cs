@@ -22,4 +22,12 @@ namespace F1Telemetry.Models.Raw.F12018
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public CarStatusData[] CarStatusData;
     }
+
+    public static class PacketCarStatusDataExtensions
+    {
+        public static CarStatusData GetPlayerLapData(this PacketCarStatusData packetCarStatusData)
+        {
+            return packetCarStatusData.CarStatusData[packetCarStatusData.Header.PlayerCarIndex];
+        }
+    }
 }
