@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -169,8 +168,6 @@ namespace F1Telemetry
 
         private void HandlePacket(PacketHeader packet, byte[] bytes)
         {
-            Debug.WriteLine($"Received {packet.PacketType}");
-
             _telemetryRecorder.RecordPacket(packet, bytes);
 
             if ((_oldSessionId != 0 && packet.SessionUId != _oldSessionId) || packet.FrameIdentifier < _oldFrameIdentifier)
