@@ -28,7 +28,7 @@ namespace F1TelemetryUi.ViewModels
         private int _rpmMin = 3000;
         private int _sector;
         private TimeSpan[] _sectorTimes = new TimeSpan[3];
-        private SeriesCollection _seriesCollection;
+        private SeriesCollection _seriesCollection = new SeriesCollection();
         private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
 
         private double? _timeMax;
@@ -231,7 +231,7 @@ namespace F1TelemetryUi.ViewModels
 
         private void _f1Manager_CarStatusReceived(object sender, PacketReceivedEventArgs<CarStatusData> e)
         {
-            GearMax = e.Packet.MaxGears;
+            GearMax = e.Packet.MaxGears - 1;
             RpmMax = e.Packet.MaxRpm;
             RpmMin = e.Packet.IdleRpm;
         }
