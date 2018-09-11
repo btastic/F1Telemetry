@@ -151,21 +151,11 @@ namespace F1Telemetry
 
         private void OnCarStatusReceived(CarStatusData oldCarStatusData, CarStatusData newCarStatusData)
         {
-            if (oldCarStatusData.Equals(newCarStatusData))
-            {
-                return;
-            }
-
             CarStatusReceived?.Invoke(this, new PacketReceivedEventArgs<CarStatusData>(oldCarStatusData, newCarStatusData));
         }
 
         private void OnCarTelemetryReceived(CarTelemetryData oldCarTelemetryData, CarTelemetryData newCarTelemetryData)
         {
-            if (oldCarTelemetryData.Equals(newCarTelemetryData))
-            {
-                return;
-            }
-
             CarTelemetryReceived?.Invoke(this, new PacketReceivedEventArgs<CarTelemetryData>(oldCarTelemetryData, newCarTelemetryData));
         }
 

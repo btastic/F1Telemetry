@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using F1Telemetry.Models.Raw.F12018;
 
@@ -22,6 +22,7 @@ namespace F1Telemetry
     public class TelemetryManager : IDisposable
     {
         private readonly int _port;
+        private readonly TelemetryRecorder _telemetryRecorder;
         private Thread _captureThread;
         private bool _disposed;
 
@@ -29,20 +30,23 @@ namespace F1Telemetry
         private PacketCarStatusData _oldCarStatusData;
         private PacketCarTelemetryData _oldCarTelemetryData;
         private EventPacket _oldEventPacket;
+        private uint _oldFrameIdentifier;
         private PacketLapData _oldLapData;
         private PacketMotionData _oldMotionData;
         private PacketParticipantsData _oldParticipantsData;
         private PacketSessionData _oldSessionData;
         private UInt64 _oldSessionId;
-
         private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
         private UdpClient _udpClient;
 
-        public TelemetryManager(int port = 20777)
+        public TelemetryManager(TelemetryRecorder telemetryRecorder, int port = 20777)
         {
+            _telemetryRecorder = telemetryRecorder;
             _port = port;
             InitUdp(port);
             Enable();
+
+            _telemetryRecorder.Start();
         }
 
         public event EventHandler<PacketReceivedEventArgs<PacketCarSetupData>> CarSetupPacketReceived;
@@ -62,14 +66,6 @@ namespace F1Telemetry
         public event EventHandler<EventArgs> SessionChanged;
 
         public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionPacketReceived;
-
-        public static T ConvertToPacket<T>(byte[] bytes)
-        {
-            GCHandle gchandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-            T result = (T)Marshal.PtrToStructure(gchandle.AddrOfPinnedObject(), typeof(T));
-            gchandle.Free();
-            return result;
-        }
 
         public void Dispose()
         {
@@ -173,7 +169,11 @@ namespace F1Telemetry
 
         private void HandlePacket(PacketHeader packet, byte[] bytes)
         {
-            if (_oldSessionId != 0 && packet.SessionUId != _oldSessionId)
+            Debug.WriteLine($"Received {packet.PacketType}");
+
+            _telemetryRecorder.RecordPacket(packet, bytes);
+
+            if ((_oldSessionId != 0 && packet.SessionUId != _oldSessionId) || packet.FrameIdentifier < _oldFrameIdentifier)
             {
                 OnSessionChanged(new EventArgs());
             }
@@ -181,55 +181,56 @@ namespace F1Telemetry
             switch (packet.PacketType)
             {
                 case PacketType.Motion:
-                    var motionPacket = ConvertToPacket<PacketMotionData>(bytes);
+                    var motionPacket = StructUtility.ConvertToPacket<PacketMotionData>(bytes);
                     OnMotionPacketReceived(new PacketReceivedEventArgs<PacketMotionData>(_oldMotionData, motionPacket));
                     _oldMotionData = motionPacket;
                     break;
 
                 case PacketType.Session:
-                    var sessionPacket = ConvertToPacket<PacketSessionData>(bytes);
+                    var sessionPacket = StructUtility.ConvertToPacket<PacketSessionData>(bytes);
                     OnSessionPacketReceived(new PacketReceivedEventArgs<PacketSessionData>(_oldSessionData, sessionPacket));
                     _oldSessionData = sessionPacket;
                     break;
 
                 case PacketType.LapData:
-                    var lapPacket = ConvertToPacket<PacketLapData>(bytes);
+                    var lapPacket = StructUtility.ConvertToPacket<PacketLapData>(bytes);
                     OnLapPacketReceivedReceived(new PacketReceivedEventArgs<PacketLapData>(_oldLapData, lapPacket));
                     _oldLapData = lapPacket;
                     break;
 
                 case PacketType.Event:
-                    var eventPacket = ConvertToPacket<EventPacket>(bytes);
+                    var eventPacket = StructUtility.ConvertToPacket<EventPacket>(bytes);
                     OnEventPacketReceived(new PacketReceivedEventArgs<EventPacket>(_oldEventPacket, eventPacket));
                     _oldEventPacket = eventPacket;
                     break;
 
                 case PacketType.Participants:
-                    var participantPacket = ConvertToPacket<PacketParticipantsData>(bytes);
+                    var participantPacket = StructUtility.ConvertToPacket<PacketParticipantsData>(bytes);
                     OnParticipantsPacketReceived(new PacketReceivedEventArgs<PacketParticipantsData>(_oldParticipantsData, participantPacket));
                     _oldParticipantsData = participantPacket;
                     break;
 
                 case PacketType.CarSetups:
-                    var carSetupsPacket = ConvertToPacket<PacketCarSetupData>(bytes);
+                    var carSetupsPacket = StructUtility.ConvertToPacket<PacketCarSetupData>(bytes);
                     OnCarSetupPacketReceived(new PacketReceivedEventArgs<PacketCarSetupData>(_oldCarSetupData, carSetupsPacket));
                     _oldCarSetupData = carSetupsPacket;
                     break;
 
                 case PacketType.CarTelemetry:
-                    var carTelemetryPacket = ConvertToPacket<PacketCarTelemetryData>(bytes);
+                    var carTelemetryPacket = StructUtility.ConvertToPacket<PacketCarTelemetryData>(bytes);
                     OnCarTelemetryPacketReceived(new PacketReceivedEventArgs<PacketCarTelemetryData>(_oldCarTelemetryData, carTelemetryPacket));
                     _oldCarTelemetryData = carTelemetryPacket;
                     break;
 
                 case PacketType.CarStatus:
-                    var carStatusPacket = ConvertToPacket<PacketCarStatusData>(bytes);
+                    var carStatusPacket = StructUtility.ConvertToPacket<PacketCarStatusData>(bytes);
                     OnCarStatusPacketReceived(new PacketReceivedEventArgs<PacketCarStatusData>(_oldCarStatusData, carStatusPacket));
                     _oldCarStatusData = carStatusPacket;
                     break;
             }
 
             _oldSessionId = packet.SessionUId;
+            _oldFrameIdentifier = packet.FrameIdentifier;
         }
 
         private void InitUdp(int port)
@@ -260,7 +261,7 @@ namespace F1Telemetry
                 {
                     _udpClient.Client.ReceiveTimeout = 5000;
                     byte[] receiveBytes = _udpClient.Receive(ref _senderIp);
-                    var packet = ConvertToPacket<PacketHeader>(receiveBytes);
+                    var packet = StructUtility.ConvertToPacket<PacketHeader>(receiveBytes);
                     HandlePacket(packet, receiveBytes);
                 }
 #pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body

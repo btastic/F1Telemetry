@@ -1,7 +1,9 @@
 ﻿using System.Runtime.InteropServices;
+using MessagePack;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
+    [MessagePackObject(keyAsPropertyName: true)]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct MarshalZoneData
     {

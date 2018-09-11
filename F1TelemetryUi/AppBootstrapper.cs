@@ -41,8 +41,12 @@ namespace F1TelemetryUi
                 AsSelf().
                 InstancePerDependency();
 
-            var telemetryManager = new TelemetryManager();
+            var telemetryRecorder = new TelemetryRecorder();
+            builder.Register(c => telemetryRecorder).AsSelf().SingleInstance();
+
+            var telemetryManager = new TelemetryManager(telemetryRecorder);
             builder.Register(c => telemetryManager).AsSelf().SingleInstance();
+
             builder.Register(c => new F1Manager(telemetryManager)).AsSelf().SingleInstance();
             builder.Register(c => new ReferencingStateMachine()).AsSelf().SingleInstance();
 
@@ -60,7 +64,7 @@ namespace F1TelemetryUi
 
         protected override object GetInstance(Type service, string key)
         {
-            if (!string.IsNullOrWhiteSpace(key) 
+            if (!string.IsNullOrWhiteSpace(key)
                 && Container.TryResolveKeyed(key, service, out object instance))
             {
                 return instance;
