@@ -63,12 +63,17 @@ namespace F1TelemetryUi.ViewModels
 
             set
             {
-                _currentLapTime = value;
-                NotifyOfPropertyChange();
+                if (_currentLapTime != value)
+                {
+                    _currentLapTime = value;
+                    NotifyOfPropertyChange();
+                }
             }
         }
 
         public Func<double, string> Formatter { get; set; }
+
+        private bool _graphInitialized;
 
         public int GearMax
         {
@@ -238,6 +243,11 @@ namespace F1TelemetryUi.ViewModels
 
         private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<PacketCarTelemetryData> e)
         {
+            if (!_graphInitialized)
+            {
+                return;
+            }
+
             if (!e.OldPacket.Equals(default(PacketCarTelemetryData)) && !e.Packet.Equals(default(PacketCarTelemetryData)))
             {
                 if (Math.Abs(e.Packet.GetPlayerLapData().Speed - e.OldPacket.GetPlayerLapData().Speed) > 0.1f)
@@ -346,6 +356,8 @@ namespace F1TelemetryUi.ViewModels
                 var x = value > 0 ? value : 0;
                 return new DateTime((long)(x * TimeSpan.FromMilliseconds(1).Ticks)).ToString("mm\\:ss\\:fff");
             };
+
+            _graphInitialized = true;
         }
     }
 }

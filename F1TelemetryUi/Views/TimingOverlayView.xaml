@@ -17,6 +17,6 @@
                          Opacity="0.05" />
     </controls:MetroWindow.Background>
     <Grid>
-
+        <Label FontFamily="/Resources/Formula1-Regular.otf#Formula1 Display" Foreground="White" FontSize="30">Test</Label>
     </Grid>
 </controls:MetroWindow>

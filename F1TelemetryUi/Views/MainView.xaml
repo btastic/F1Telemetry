@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:F1TelemetryUi"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="MainWindow" Top="0" WindowStartupLocation="Manual" Height="450" Width="800">
     <Grid>
@@ -25,14 +26,19 @@
             </Style>
         </Grid.Resources>
 
-        <Label Grid.Row="0" Grid.Column="0" ContentStringFormat="Laptime: {0:mm\:ss\:fff}">
+        <Label FontFamily="/Resources/Formula1-Regular.otf#Formula1 Display" Grid.Row="0" Grid.Column="0" ContentStringFormat="Laptime: {0:mm\:ss\:fff}">
             <Label.Content>
                 <PriorityBinding>
-                    <Binding Path="CurrentLapTime" IsAsync="True"/>
+                    <Binding Path="CurrentLapTime" />
                 </PriorityBinding>
             </Label.Content>
         </Label>
-        <Label Grid.Row="0" Grid.Column="1" Content="{Binding SeriesCollection[0].Values.Count}"/>
+
+        <TextBlock Grid.Column="1">
+            <i:Interaction.Behaviors>
+                 <local:FrameRateBehavior />
+            </i:Interaction.Behaviors>
+        </TextBlock>
 
         <lvc:CartesianChart 
             Grid.Row="2" 
