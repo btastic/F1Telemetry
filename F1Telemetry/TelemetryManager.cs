@@ -46,7 +46,7 @@ namespace F1Telemetry
             InitUdp(port);
             Enable();
 
-            _telemetryRecorder.Start();
+            //_telemetryRecorder.Start();
         }
 
         public event EventHandler<PacketReceivedEventArgs<PacketCarSetupData>> CarSetupPacketReceived;
