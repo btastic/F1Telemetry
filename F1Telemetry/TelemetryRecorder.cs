@@ -99,7 +99,7 @@ namespace F1Telemetry
                             packets = LZ4MessagePackSerializer.Deserialize<List<BinaryPacket>>(previousData);
                         }
 
-                        packets.AddRange(_packetsToProcess);
+                        packets.AddRange(_packetsToProcess.Reverse());
 
                         var bin = LZ4MessagePackSerializer.Serialize(packets);
 
