@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using F1Telemetry.Models.Raw.F12018;
+using System.Linq;
 
 namespace F1Telemetry
 {

@@ -5,18 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:local="clr-namespace:F1TelemetryUi.Views"
+        xmlns:conv="clr-namespace:F1TelemetryUi.ValueConverters"
         mc:Ignorable="d"
         Title="TimingOverlayView" 
+        AllowsTransparency="True"
         Height="450" 
         Width="800" 
-        AllowsTransparency="True" 
-        ShowTitleBar="False"
+        Topmost="True"
         BorderThickness="0">
+    <controls:MetroWindow.Resources>
+        <conv:BoolToBrushConverter x:Key="Highlighter" FalseValue="Transparent" TrueValue="#7F959595" />
+        <conv:TyreCompoundToImageConverter x:Key="TyreCompoundConverter"/>
+    </controls:MetroWindow.Resources>
     <controls:MetroWindow.Background>
-        <SolidColorBrush Color="#FFB0B0B0"
-                         Opacity="0.05" />
+        <SolidColorBrush Color="#7F000000" />
     </controls:MetroWindow.Background>
     <Grid>
-        <Label FontFamily="/Resources/Formula1-Regular.otf#Formula1 Display" Foreground="White" FontSize="30">Test</Label>
+        <ItemsControl ItemsSource="{Binding CarData, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Background="{Binding IsPlayer, Converter={StaticResource ResourceKey=Highlighter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="40"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" FontFamily="/Resources/Formula1-Regular.otf#Formula1 Display" 
+                            Foreground="LightGray"                               
+                            FontSize="12"                               
+                            Content="{Binding CarPosition}"/>
+                        <Label Grid.Column="1" FontFamily="/Resources/Formula1-Regular.otf#Formula1 Display" 
+                            Foreground="LightGray"
+                            FontSize="12"
+                            Content="{Binding TimeDistanceCarAhead}"/>
+                        <Image Width="20" 
+                               Height="20"                               
+                               Grid.Column="2" 
+                               Source="{Binding TyreCompound, Converter={StaticResource ResourceKey=TyreCompoundConverter}}"/>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </controls:MetroWindow>

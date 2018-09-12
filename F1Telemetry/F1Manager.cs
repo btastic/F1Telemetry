@@ -6,22 +6,15 @@ namespace F1Telemetry
     public class F1Manager
     {
         private readonly TelemetryManager _telemetryManager;
-
-        private DateTimeOffset _dataLastReceived;
-
-        private readonly DateTimeOffset _dataLastSend = DateTimeOffset.MinValue;
+        private DateTimeOffset _lastSent = DateTimeOffset.MinValue;
 
         public F1Manager(TelemetryManager telemetryManager)
         {
             _telemetryManager = telemetryManager;
-            UpdateInterval = 60;
-            _telemetryManager.CarSetupPacketReceived += _telemetryManager_CarSetupPacketReceived;
+            UpdateInterval = 500;
             _telemetryManager.CarStatusPacketReceived += _telemetryManager_CarStatusPacketReceived;
             _telemetryManager.CarTelemetryPacketReceived += _telemetryManager_CarTelemetryPacketReceived;
-            _telemetryManager.EventPacketReceived += _telemetryManager_EventPacketReceived;
             _telemetryManager.LapPacketReceived += _telemetryManager_LapPacketReceived;
-            _telemetryManager.ParticipantsPacketReceived += _telemetryManager_ParticipantsPacketReceived;
-            _telemetryManager.SessionPacketReceived += _telemetryManager_SessionPacketReceived;
             _telemetryManager.SessionChanged += _telemetryManager_SessionChanged;
         }
 
@@ -39,20 +32,12 @@ namespace F1Telemetry
         {
             get
             {
-                if (_dataLastSend == DateTimeOffset.MinValue)
+                if (_lastSent == DateTimeOffset.MinValue)
                 {
                     return true;
                 }
 
-                return (DateTimeOffset.Now - _dataLastSend).Ticks >= UpdateInterval;
-            }
-        }
-
-        public bool IsRunning
-        {
-            get
-            {
-                return (DateTimeOffset.Now - _dataLastReceived).TotalSeconds > 5;
+                return (DateTimeOffset.Now - _lastSent).Milliseconds >= UpdateInterval;
             }
         }
 
@@ -63,16 +48,6 @@ namespace F1Telemetry
             _telemetryManager.Enable();
         }
 
-        protected virtual void OnLapPacketReceived(PacketReceivedEventArgs<PacketLapData> e)
-        {
-            LapPacketReceived?.Invoke(this, e);
-        }
-
-        private void _telemetryManager_CarSetupPacketReceived(object sender, PacketReceivedEventArgs<PacketCarSetupData> e)
-        {
-            _dataLastReceived = DateTimeOffset.Now;
-        }
-
         private void _telemetryManager_CarStatusPacketReceived(object sender, PacketReceivedEventArgs<PacketCarStatusData> e)
         {
             if (e.OldPacket.Equals(default(PacketCarStatusData)))
@@ -80,8 +55,6 @@ namespace F1Telemetry
                 return;
             }
 
-            _dataLastReceived = DateTimeOffset.Now;
-                    
             OnCarStatusReceived(e.Packet, e.OldPacket);
         }
 
@@ -92,19 +65,7 @@ namespace F1Telemetry
                 return;
             }
 
-            _dataLastReceived = DateTimeOffset.Now;
-
             OnCarTelemetryReceived(e.Packet, e.OldPacket);
-        }
-
-        private void _telemetryManager_EventPacketReceived(object sender, PacketReceivedEventArgs<EventPacket> e)
-        {
-            if (e.OldPacket.Equals(default(EventPacket)))
-            {
-                return;
-            }
-
-            _dataLastReceived = DateTimeOffset.Now;
         }
 
         private void _telemetryManager_LapPacketReceived(object sender, PacketReceivedEventArgs<PacketLapData> e)
@@ -113,36 +74,14 @@ namespace F1Telemetry
             {
                 return;
             }
-            
-            _dataLastReceived = DateTimeOffset.Now;
 
             CheckLapChanged(e);
             OnLapPacketReceived(new PacketReceivedEventArgs<PacketLapData>(e.Packet, e.OldPacket));
         }
 
-        private void _telemetryManager_ParticipantsPacketReceived(object sender, PacketReceivedEventArgs<PacketParticipantsData> e)
-        {
-            if (e.OldPacket.Equals(default(PacketParticipantsData)))
-            {
-                return;
-            }
-
-            _dataLastReceived = DateTimeOffset.Now;
-        }
-
         private void _telemetryManager_SessionChanged(object sender, EventArgs e)
         {
             OnSessionChanged(e);
-        }
-
-        private void _telemetryManager_SessionPacketReceived(object sender, PacketReceivedEventArgs<PacketSessionData> e)
-        {
-            if (e.OldPacket.Equals(default(PacketSessionData)))
-            {
-                return;
-            }
-
-            _dataLastReceived = DateTimeOffset.Now;
         }
 
         private void CheckLapChanged(PacketReceivedEventArgs<PacketLapData> e)
@@ -156,6 +95,14 @@ namespace F1Telemetry
             }
         }
 
+        protected virtual void OnLapPacketReceived(PacketReceivedEventArgs<PacketLapData> e)
+        {
+            if (CanSend)
+            {
+                LapPacketReceived?.Invoke(this, e);
+            }
+        }
+
         private void OnCarStatusReceived(PacketCarStatusData oldCarStatusData, PacketCarStatusData newCarStatusData)
         {
             CarStatusReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarStatusData>(oldCarStatusData, newCarStatusData));
@@ -163,7 +110,11 @@ namespace F1Telemetry
 
         private void OnCarTelemetryReceived(PacketCarTelemetryData oldCarTelemetryData, PacketCarTelemetryData newCarTelemetryData)
         {
-            CarTelemetryReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarTelemetryData>(oldCarTelemetryData, newCarTelemetryData));
+            if (CanSend)
+            {
+                CarTelemetryReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarTelemetryData>(oldCarTelemetryData, newCarTelemetryData));
+                _lastSent = DateTimeOffset.Now;
+            }
         }
 
         private void OnNewLap(int lastLap, int currentLap)

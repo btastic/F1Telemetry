@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>F1TelemetryUi</RootNamespace>
     <AssemblyName>F1TelemetryUi</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -66,9 +66,6 @@
     <Reference Include="PanAndZoom, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\PanAndZoom.1.0.1\lib\net45\PanAndZoom.dll</HintPath>
     </Reference>
-    <Reference Include="SimHub.Plugins">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\SimHub\SimHub.Plugins.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -88,10 +85,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WoteverCommon, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\SimHub\WoteverCommon.dll</HintPath>
-    </Reference>
     <Reference Include="Wpf.Controls.PanAndZoom, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Wpf.Controls.PanAndZoom.1.0.1\lib\net45\Wpf.Controls.PanAndZoom.dll</HintPath>
     </Reference>
@@ -102,6 +95,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AppBootstrapper.cs" />
+    <Compile Include="Utility\SortedObservableCollection.cs" />
+    <Compile Include="ValueConverters\CarTimingViewModel.cs" />
     <Compile Include="Events\ClearCanvasEvent.cs" />
     <Compile Include="Events\DrawEvent.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
@@ -111,6 +106,8 @@
     <Compile Include="Referencing\ReferencingState.cs" />
     <Compile Include="Referencing\ReferencingStateChangedArgs.cs" />
     <Compile Include="Referencing\ReferencingStateMachine.cs" />
+    <Compile Include="ValueConverters\GenericBoolConverter.cs" />
+    <Compile Include="ValueConverters\TyreCompoundToImageConverter.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="ViewModels\MapViewModel.cs" />
@@ -158,6 +155,15 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\hard-new.png" />
+    <Resource Include="Resources\hypersoft-new.png" />
+    <Resource Include="Resources\intermediate-new.png" />
+    <Resource Include="Resources\medium-new.png" />
+    <Resource Include="Resources\soft-new.png" />
+    <Resource Include="Resources\superhard-new.png" />
+    <Resource Include="Resources\supersoft-new.png" />
+    <Resource Include="Resources\ultrasoft-new.png" />
+    <Resource Include="Resources\wet-new.png" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

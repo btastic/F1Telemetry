@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -93,6 +94,7 @@
     <Compile Include="Models\Raw\F12018\Team.cs" />
     <Compile Include="Models\Raw\F12018\Track.cs" />
     <Compile Include="Models\Raw\F12018\TractionControl.cs" />
+    <Compile Include="Models\Raw\F12018\TyreCompound.cs" />
     <Compile Include="Models\Raw\F12018\WeatherType.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="NewLapEventArgs.cs" />
@@ -103,7 +105,9 @@
     <Compile Include="TelemetryRecorder.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

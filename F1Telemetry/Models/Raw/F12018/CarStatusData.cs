@@ -75,7 +75,7 @@ namespace F1Telemetry.Models.Raw.F12018
         ///
         /// Classic - 0-6 = dry, 7-8 = wet
         /// </summary>
-        public byte TyreCompound;
+        public TyreCompound TyreCompound;
 
         /// <summary>
         /// Tyre damage (percentage)
