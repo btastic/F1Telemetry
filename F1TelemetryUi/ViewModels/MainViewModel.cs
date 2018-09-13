@@ -4,6 +4,8 @@ using System.ComponentModel.Composition;
 using System.Windows.Media;
 using Caliburn.Micro;
 using F1Telemetry;
+using F1Telemetry.Events;
+using F1Telemetry.Manager;
 using F1Telemetry.Models.Raw.F12017;
 using F1Telemetry.Models.Raw.F12018;
 using F1TelemetryUi.Events;
@@ -17,8 +19,6 @@ namespace F1TelemetryUi.ViewModels
     public class MainViewModel : PropertyChangedBase, IShell
     {
         private readonly IEventAggregator _eventAggregator;
-        private readonly F1Manager _f1Manager;
-        private readonly IWindowManager _windowManager;
         private TimeSpan _currentLapTime;
         private int _gearMax = 8;
         private int _gearMin = 1;
@@ -29,7 +29,6 @@ namespace F1TelemetryUi.ViewModels
         private int _sector;
         private TimeSpan[] _sectorTimes = new TimeSpan[3];
         private SeriesCollection _seriesCollection = new SeriesCollection();
-        private List<F12017TelemetryPacket> _telemetryPackets = new List<F12017TelemetryPacket>();
 
         private double? _timeMax;
 
@@ -40,10 +39,10 @@ namespace F1TelemetryUi.ViewModels
             IEventAggregator eventAggregator,
             F1Manager f1Manager)
         {
-            _windowManager = windowManager;
+            IWindowManager _windowManager = windowManager;
             _eventAggregator = eventAggregator;
 
-            _f1Manager = f1Manager;
+            F1Manager _f1Manager = f1Manager;
             _f1Manager.NewLap += _f1Manager_NewLap;
             _f1Manager.LapPacketReceived += _f1Manager_LapPacketReceived;
             _f1Manager.CarTelemetryReceived += _f1Manager_CarTelemetryReceived;
@@ -192,20 +191,6 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
-        public List<F12017TelemetryPacket> TelemetryPackets
-        {
-            get
-            {
-                return _telemetryPackets;
-            }
-
-            set
-            {
-                _telemetryPackets = value;
-                NotifyOfPropertyChange();
-            }
-        }
-
         public double? TimeMax
         {
             get
@@ -284,16 +269,6 @@ namespace F1TelemetryUi.ViewModels
             SeriesCollection[2].Values.Clear();
 
             _eventAggregator.PublishOnUIThread(new ClearCanvasEvent());
-            if (TelemetryPackets.Count > 1000) // probably more than a thousand to finish a real lap
-            {
-                //var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<F12017TelemetryPacket>));
-
-                //System.IO.TextWriter writer = new System.IO.StreamWriter("D:\\temp\\laphsilver.xml");
-                //serializer.Serialize(writer, TelemetryPackets);
-
-                TelemetryPackets.Clear();
-            }
-
             NotifyOfPropertyChange(() => SeriesCollection);
         }
 
@@ -302,7 +277,6 @@ namespace F1TelemetryUi.ViewModels
             SeriesCollection[0].Values.Clear();
             SeriesCollection[1].Values.Clear();
             SeriesCollection[2].Values.Clear();
-            TelemetryPackets.Clear();
 
             NotifyOfPropertyChange(() => SeriesCollection);
         }

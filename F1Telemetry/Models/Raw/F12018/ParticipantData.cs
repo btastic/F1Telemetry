@@ -1,8 +1,53 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using MessagePack;
 
 namespace F1Telemetry.Models.Raw.F12018
 {
+    public static class ParticipantDataExtensions
+    {
+        public static string GetThreeLetterName(this ParticipantData participantData)
+        {
+            switch (participantData.Driver)
+            {
+                case Driver.CarlosSainz:
+                    return "SAI";
+                case Driver.DanielRicciardo:
+                    return "RIC";
+                case Driver.FernandoAlonso:
+                    return "ALO";
+                case Driver.KimiRaikkonen:
+                    return "RAI";
+                case Driver.LewisHamilton:
+                    return "HAM";
+                case Driver.MarcusEricsson:
+                    return "ERI";
+                case Driver.MaxVerstappen:
+                    return "VER";
+                case Driver.NicoHulkenberg:
+                    return "HUL";
+                case Driver.KevinMagnussen:
+                    return "MAG";
+                case Driver.RomainGrosjean:
+                    return "GRO";
+                case Driver.SebastianVettel:
+                    return "VET";
+                case Driver.SergioPerez:
+                    return "PER";
+                case Driver.ValtteriBottas:
+                    return "BOT";
+                case Driver.EstebanOcon:
+                    return "OCO";
+                case Driver.StoffelVandoorne:
+                    return "VAN";
+                case Driver.LanceStroll:
+                    return "STR";
+                default:
+                    return Encoding.UTF8.GetString(participantData.Name);
+            }
+        }
+    }
+
     [MessagePackObject(keyAsPropertyName: true)]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ParticipantData
@@ -37,6 +82,6 @@ namespace F1Telemetry.Models.Raw.F12018
         /// Will be truncated with … (U+2026) if too long
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 48)]
-        public char[] Name;
+        public byte[] Name;
     }
 }

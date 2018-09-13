@@ -2,24 +2,12 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using F1Telemetry.Events;
 using F1Telemetry.Models.Raw.F12018;
-using System.Linq;
 
-namespace F1Telemetry
+namespace F1Telemetry.Manager
 {
-    public class PacketReceivedEventArgs<T> : EventArgs
-    {
-        public PacketReceivedEventArgs(T oldPacket, T packet)
-        {
-            OldPacket = oldPacket;
-            Packet = packet;
-        }
-
-        public T OldPacket { get; set; }
-        public T Packet { get; set; }
-    }
-
-    public class TelemetryManager : IDisposable
+    public sealed class TelemetryManager : IDisposable
     {
         private readonly int _port;
         private readonly TelemetryRecorder _telemetryRecorder;
@@ -35,7 +23,7 @@ namespace F1Telemetry
         private PacketMotionData _oldMotionData;
         private PacketParticipantsData _oldParticipantsData;
         private PacketSessionData _oldSessionData;
-        private UInt64 _oldSessionId;
+        private ulong _oldSessionId;
         private IPEndPoint _senderIp = new IPEndPoint(IPAddress.Any, 0);
         private UdpClient _udpClient;
 
@@ -63,7 +51,7 @@ namespace F1Telemetry
 
         public event EventHandler<PacketReceivedEventArgs<PacketParticipantsData>> ParticipantsPacketReceived;
 
-        public event EventHandler<EventArgs> SessionChanged;
+        public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionChanged;
 
         public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionPacketReceived;
 
@@ -84,7 +72,7 @@ namespace F1Telemetry
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (_disposed)
             {
@@ -117,64 +105,60 @@ namespace F1Telemetry
             _disposed = true;
         }
 
-        protected virtual void OnCarSetupPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
+        private void OnCarSetupPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
         {
             CarSetupPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnCarStatusPacketReceived(PacketReceivedEventArgs<PacketCarStatusData> e)
+        private void OnCarStatusPacketReceived(PacketReceivedEventArgs<PacketCarStatusData> e)
         {
             CarStatusPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnCarTelemetryPacketReceived(PacketReceivedEventArgs<PacketCarTelemetryData> e)
+        private void OnCarTelemetryPacketReceived(PacketReceivedEventArgs<PacketCarTelemetryData> e)
         {
             CarTelemetryPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnEventPacketReceived(PacketReceivedEventArgs<EventPacket> e)
+        private void OnEventPacketReceived(PacketReceivedEventArgs<EventPacket> e)
         {
             EventPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnLapPacketReceivedReceived(PacketReceivedEventArgs<PacketLapData> e)
+        private void OnLapPacketReceivedReceived(PacketReceivedEventArgs<PacketLapData> e)
         {
             LapPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnMotionPacketReceived(PacketReceivedEventArgs<PacketMotionData> e)
+        private void OnMotionPacketReceived(PacketReceivedEventArgs<PacketMotionData> e)
         {
             MotionPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
-        {
-            CarSetupPacketReceived?.Invoke(this, e);
-        }
-
-        protected virtual void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
+        private void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
         {
             ParticipantsPacketReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnSessionChanged(EventArgs e)
+        private void OnSessionChanged(PacketReceivedEventArgs<PacketSessionData> e)
         {
             SessionChanged?.Invoke(this, e);
         }
 
-        protected virtual void OnSessionPacketReceived(PacketReceivedEventArgs<PacketSessionData> e)
+        private void OnSessionPacketReceived(PacketReceivedEventArgs<PacketSessionData> e)
         {
+            if ((_oldSessionId != 0 && e.Packet.PacketHeader.SessionUId != _oldSessionId) ||
+                e.Packet.PacketHeader.FrameIdentifier < _oldFrameIdentifier)
+            {
+                OnSessionChanged(e);
+            }
+
             SessionPacketReceived?.Invoke(this, e);
         }
 
         private void HandlePacket(PacketHeader packet, byte[] bytes)
         {
             _telemetryRecorder.RecordPacket(packet, bytes);
-
-            if ((_oldSessionId != 0 && packet.SessionUId != _oldSessionId) || packet.FrameIdentifier < _oldFrameIdentifier)
-            {
-                OnSessionChanged(new EventArgs());
-            }
 
             switch (packet.PacketType)
             {

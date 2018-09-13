@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using F1Telemetry.Models.Raw.F12018;
 using MessagePack;
 
-namespace F1Telemetry
+namespace F1Telemetry.Manager
 {
     public class TelemetryRecorder
     {

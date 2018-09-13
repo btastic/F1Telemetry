@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Features.ResolveAnything;
 using Caliburn.Micro;
 using F1Telemetry;
+using F1Telemetry.Manager;
 using F1TelemetryUi.Referencing;
 using F1TelemetryUi.ViewModels;
 
@@ -75,7 +76,7 @@ namespace F1TelemetryUi
                 return Container.Resolve(service);
             }
 
-            throw new Exception($"Could not locate any instances of contract {key ?? service.Name}.");
+            throw new ArgumentException($"Could not locate any instances of contract {key ?? service.Name}.");
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)

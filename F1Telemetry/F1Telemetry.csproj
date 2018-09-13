@@ -54,7 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinaryPacket.cs" />
+    <Compile Include="Models\BinaryPacket.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\Raw\F12018\Driver.cs" />
     <Compile Include="Models\Raw\F12018\DriverStatus.cs" />
@@ -68,7 +68,7 @@
     <Compile Include="Models\Raw\F12018\PacketType.cs" />
     <Compile Include="Models\F12017DisplayModel.cs" />
     <Compile Include="Models\Raw\F12017\CarUDPData.cs" />
-    <Compile Include="F1Manager.cs" />
+    <Compile Include="Manager\F1Manager.cs" />
     <Compile Include="Models\Raw\F12018\CarMotionData.cs" />
     <Compile Include="Models\Raw\F12018\CarSetupData.cs" />
     <Compile Include="Models\Raw\F12018\CarStatusData.cs" />
@@ -97,12 +97,13 @@
     <Compile Include="Models\Raw\F12018\TyreCompound.cs" />
     <Compile Include="Models\Raw\F12018\WeatherType.cs" />
     <Compile Include="Models\Track.cs" />
-    <Compile Include="NewLapEventArgs.cs" />
-    <Compile Include="StructUtility.cs" />
-    <Compile Include="TelemetryManager.cs" />
+    <Compile Include="Events\NewLapEventArgs.cs" />
+    <Compile Include="Events\PacketReceivedEventArgs.cs" />
+    <Compile Include="Utility\StructUtility.cs" />
+    <Compile Include="Manager\TelemetryManager.cs" />
     <Compile Include="Models\Raw\F12017\F12017TelemetryPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TelemetryRecorder.cs" />
+    <Compile Include="Manager\TelemetryRecorder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

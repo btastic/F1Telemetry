@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Caliburn.Micro;
 using F1Telemetry;
+using F1Telemetry.Events;
+using F1Telemetry.Manager;
 using F1Telemetry.Models.Raw.F12018;
 using F1TelemetryUi.Utility;
 
@@ -10,23 +13,57 @@ namespace F1TelemetryUi.ViewModels
 {
     public class TimingOverlayViewModel : PropertyChangedBase, IShell
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly F1Manager _f1Manager;
-        private readonly IWindowManager _windowManager;
-
         private SortedObservableCollection<CarTimingViewModel> _carData = new SortedObservableCollection<CarTimingViewModel>();
 
         public TimingOverlayViewModel(IWindowManager windowManager,
             IEventAggregator eventAggregator,
             F1Manager f1Manager)
         {
-            _windowManager = windowManager;
-            _eventAggregator = eventAggregator;
-            _f1Manager = f1Manager;
+            F1Manager _f1Manager = f1Manager;
 
             _f1Manager.LapPacketReceived += _f1Manager_LapPacketReceived;
             _f1Manager.CarTelemetryReceived += _f1Manager_CarTelemetryReceived;
             _f1Manager.CarStatusReceived += _f1Manager_CarStatusReceived;
+            _f1Manager.SessionChanged += _f1Manager_SessionChanged;
+            _f1Manager.SessionPacketReceived += _f1Manager_SessionPacketReceived;
+            _f1Manager.ParticipantsPacketReceived += _f1Manager_ParticipantsPacketReceived;
+        }
+
+        private void _f1Manager_ParticipantsPacketReceived(object sender, PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            UpdateParticipantInfo(e);
+        }
+
+        private void UpdateParticipantInfo(PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            if (LastLapPacketCarData == null || LastLapPacketCarData.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < LastLapPacketCarData.Count; i++)
+            {
+                LastLapPacketCarData[i].Name = e.Packet.Participants[i].GetThreeLetterName();
+                LastLapPacketCarData[i].Team = e.Packet.Participants[i].Team;
+            }
+
+            NotifyOfPropertyChange("CarData");
+        }
+
+        private void _f1Manager_SessionPacketReceived(object sender, PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            UpdateSession(e);
+        }
+
+        private void _f1Manager_SessionChanged(object sender, PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            UpdateSession(e);
+        }
+
+        private void UpdateSession(PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            MaxLaps = e.Packet.TotalLaps;
+            NotifyOfPropertyChange("CurrentLap");
         }
 
         public SortedObservableCollection<CarTimingViewModel> CarData
@@ -41,8 +78,37 @@ namespace F1TelemetryUi.ViewModels
             {
                 _carData = value;
                 NotifyOfPropertyChange("CarData");
+                NotifyOfPropertyChange("CurrentLap");
             }
         }
+
+        public int CurrentLap
+        {
+            get
+            {
+                if (CarData == null || CarData.Count == 0)
+                {
+                    return 0;
+                }
+
+                CarTimingViewModel leadingCar = CarData.SingleOrDefault(x => x.CarPosition == 1);
+
+                if (leadingCar == null)
+                {
+                    return 0;
+                }
+
+                return leadingCar.CurrentLap;
+            }
+        }
+
+        private int _maxLaps;
+        public int MaxLaps
+        {
+            get { return _maxLaps; }
+            set { _maxLaps = value; NotifyOfPropertyChange(); }
+        }
+
 
         public List<CarTimingViewModel> LastLapPacketCarData { get; private set; } = new List<CarTimingViewModel>();
 
@@ -126,13 +192,13 @@ namespace F1TelemetryUi.ViewModels
 
                 LastLapPacketCarData[i].TimeDistanceCarAhead =
                     carInFront == null
-                    ? TimeSpan.Zero.ToString("ss':'fff")
-                    : TimeSpan.FromSeconds((carInFront.Distance - currentCar.Distance) / Math.Max(currentCar.Speed, .1f)).ToString("ss':'fff");
+                    ? "Interval"
+                    : "+ " + TimeSpan.FromSeconds((carInFront.Distance - currentCar.Distance) / Math.Max(currentCar.Speed, .1f)).ToString("s\\.fff");
 
                 LastLapPacketCarData[i].TimeDistanceCarBehind =
                     carBehind == null
-                    ? TimeSpan.Zero.ToString("ss':'fff")
-                    : TimeSpan.FromSeconds((currentCar.Distance - carBehind.Distance) / Math.Max(carBehind.Speed, .1f)).ToString("ss':'fff");
+                    ? TimeSpan.Zero.ToString("s\\.fff")
+                    : "+ " + TimeSpan.FromSeconds((currentCar.Distance - carBehind.Distance) / Math.Max(carBehind.Speed, .1f)).ToString("s\\.fff");
             }
 
             NotifyOfPropertyChange("CarData");
@@ -151,6 +217,7 @@ namespace F1TelemetryUi.ViewModels
                 LastLapPacketCarData[i].Distance = packetLapData.LapData[i].TotalDistance;
                 LastLapPacketCarData[i].IsPlayer =
                     packetLapData.GetPlayerLapData().CarPosition == packetLapData.LapData[i].CarPosition;
+                LastLapPacketCarData[i].CurrentLap = packetLapData.LapData[i].CurrentLapNum;
             }
 
             NotifyOfPropertyChange("CarData");

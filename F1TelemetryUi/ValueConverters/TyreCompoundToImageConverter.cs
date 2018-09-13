@@ -10,15 +10,15 @@ namespace F1TelemetryUi.ValueConverters
     [ValueConversion(typeof(TyreCompound), typeof(ImageSource))]
     public class TyreCompoundToImageConverter : IValueConverter
     {
-        private static BitmapImage s_hyperSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/hypersoft-new.png"));
-        private static BitmapImage s_ultraSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/ultrasoft-new.png"));
-        private static BitmapImage s_superSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/supersoft-new.png"));
-        private static BitmapImage s_softImage = new BitmapImage(new Uri("pack://application:,,,/Resources/soft-new.png"));
-        private static BitmapImage s_mediumImage = new BitmapImage(new Uri("pack://application:,,,/Resources/medium-new.png"));
-        private static BitmapImage s_hardImage = new BitmapImage(new Uri("pack://application:,,,/Resources/hard-new.png"));
-        private static BitmapImage s_superHardImage = new BitmapImage(new Uri("pack://application:,,,/Resources/superhard-new.png"));
-        private static BitmapImage s_intermediateImage = new BitmapImage(new Uri("pack://application:,,,/Resources/intermediate-new.png"));
-        private static BitmapImage s_wetImage = new BitmapImage(new Uri("pack://application:,,,/Resources/wet-new.png"));
+        private static readonly BitmapImage s_hyperSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/hypersoft-new.png"));
+        private static readonly BitmapImage s_ultraSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/ultrasoft-new.png"));
+        private static readonly BitmapImage s_superSoftImage = new BitmapImage(new Uri("pack://application:,,,/Resources/supersoft-new.png"));
+        private static readonly BitmapImage s_softImage = new BitmapImage(new Uri("pack://application:,,,/Resources/soft-new.png"));
+        private static readonly BitmapImage s_mediumImage = new BitmapImage(new Uri("pack://application:,,,/Resources/medium-new.png"));
+        private static readonly BitmapImage s_hardImage = new BitmapImage(new Uri("pack://application:,,,/Resources/hard-new.png"));
+        private static readonly BitmapImage s_superHardImage = new BitmapImage(new Uri("pack://application:,,,/Resources/superhard-new.png"));
+        private static readonly BitmapImage s_intermediateImage = new BitmapImage(new Uri("pack://application:,,,/Resources/intermediate-new.png"));
+        private static readonly BitmapImage s_wetImage = new BitmapImage(new Uri("pack://application:,,,/Resources/wet-new.png"));
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

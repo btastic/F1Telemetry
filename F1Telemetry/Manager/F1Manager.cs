@@ -1,7 +1,8 @@
 ﻿using System;
+using F1Telemetry.Events;
 using F1Telemetry.Models.Raw.F12018;
 
-namespace F1Telemetry
+namespace F1Telemetry.Manager
 {
     public class F1Manager
     {
@@ -16,7 +17,28 @@ namespace F1Telemetry
             _telemetryManager.CarTelemetryPacketReceived += _telemetryManager_CarTelemetryPacketReceived;
             _telemetryManager.LapPacketReceived += _telemetryManager_LapPacketReceived;
             _telemetryManager.SessionChanged += _telemetryManager_SessionChanged;
+            _telemetryManager.SessionPacketReceived += _telemetryManager_SessionPacketReceived;
+            _telemetryManager.ParticipantsPacketReceived += _telemetryManager_ParticipantsPacketReceived;
         }
+
+        private void _telemetryManager_ParticipantsPacketReceived(object sender, PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            OnParticipantsPacketReceived(e);
+        }
+
+        private void _telemetryManager_SessionPacketReceived(object sender, PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            if (e.OldPacket.Equals(default(PacketCarStatusData)))
+            {
+                return;
+            }
+
+            OnSessionPacketReceived(e.Packet, e.OldPacket);
+        }
+
+        public event EventHandler<PacketReceivedEventArgs<PacketParticipantsData>> ParticipantsPacketReceived;
+
+        public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionPacketReceived;
 
         public event EventHandler<PacketReceivedEventArgs<PacketCarStatusData>> CarStatusReceived;
 
@@ -26,7 +48,7 @@ namespace F1Telemetry
 
         public event EventHandler<NewLapEventArgs> NewLap;
 
-        public event EventHandler<EventArgs> SessionChanged;
+        public event EventHandler<PacketReceivedEventArgs<PacketSessionData>> SessionChanged;
 
         public bool CanSend
         {
@@ -79,7 +101,7 @@ namespace F1Telemetry
             OnLapPacketReceived(new PacketReceivedEventArgs<PacketLapData>(e.Packet, e.OldPacket));
         }
 
-        private void _telemetryManager_SessionChanged(object sender, EventArgs e)
+        private void _telemetryManager_SessionChanged(object sender, PacketReceivedEventArgs<PacketSessionData> e)
         {
             OnSessionChanged(e);
         }
@@ -103,6 +125,11 @@ namespace F1Telemetry
             }
         }
 
+        private void OnSessionPacketReceived(PacketSessionData oldSessionData, PacketSessionData newSessionData)
+        {
+            SessionPacketReceived?.Invoke(this, new PacketReceivedEventArgs<PacketSessionData>(oldSessionData, newSessionData));
+        }
+
         private void OnCarStatusReceived(PacketCarStatusData oldCarStatusData, PacketCarStatusData newCarStatusData)
         {
             CarStatusReceived?.Invoke(this, new PacketReceivedEventArgs<PacketCarStatusData>(oldCarStatusData, newCarStatusData));
@@ -122,9 +149,14 @@ namespace F1Telemetry
             NewLap?.Invoke(this, new NewLapEventArgs(lastLap, currentLap));
         }
 
-        private void OnSessionChanged(EventArgs e)
+        private void OnSessionChanged(PacketReceivedEventArgs<PacketSessionData> e)
         {
             SessionChanged?.Invoke(this, e);
+        }
+
+        private void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            ParticipantsPacketReceived?.Invoke(this, e);
         }
     }
 }

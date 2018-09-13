@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace F1Telemetry
+namespace F1Telemetry.Events
 {
     public class NewLapEventArgs : EventArgs
     {

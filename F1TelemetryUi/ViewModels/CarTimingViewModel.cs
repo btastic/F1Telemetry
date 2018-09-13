@@ -69,5 +69,30 @@ namespace F1TelemetryUi.ViewModels
                 NotifyOfPropertyChange();
             }
         }
+
+        private int _currentLap;
+        public int CurrentLap
+        {
+            get => _currentLap;
+            set
+            {
+                _currentLap = value;
+                NotifyOfPropertyChange();
+            }
+        }
+
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; NotifyOfPropertyChange(); }
+        }
+
+        private Team _team;
+        public Team Team
+        {
+            get { return _team; }
+            set { _team = value; NotifyOfPropertyChange(); }
+        }
     }
 }

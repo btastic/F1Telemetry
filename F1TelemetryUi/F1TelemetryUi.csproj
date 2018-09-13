@@ -96,7 +96,7 @@
     </ApplicationDefinition>
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="Utility\SortedObservableCollection.cs" />
-    <Compile Include="ValueConverters\CarTimingViewModel.cs" />
+    <Compile Include="ViewModels\CarTimingViewModel.cs" />
     <Compile Include="Events\ClearCanvasEvent.cs" />
     <Compile Include="Events\DrawEvent.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
@@ -107,16 +107,13 @@
     <Compile Include="Referencing\ReferencingStateChangedArgs.cs" />
     <Compile Include="Referencing\ReferencingStateMachine.cs" />
     <Compile Include="ValueConverters\GenericBoolConverter.cs" />
+    <Compile Include="ValueConverters\TeamIdToBrushConverter.cs" />
     <Compile Include="ValueConverters\TyreCompoundToImageConverter.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
-    <Compile Include="ViewModels\MapViewModel.cs" />
     <Compile Include="ViewModels\NewMapViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TimingOverlayViewModel.cs" />
-    <Compile Include="Views\MapView.xaml.cs">
-      <DependentUpon>MapView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\NewMapView.xaml.cs">
       <DependentUpon>NewMapView.xaml</DependentUpon>
     </Compile>
@@ -136,10 +133,6 @@
       <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\MapView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
     <Page Include="Views\NewMapView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
