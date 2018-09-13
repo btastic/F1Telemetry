@@ -62,6 +62,8 @@ namespace F1TelemetryUi.ViewModels
 
         private void UpdateSession(PacketReceivedEventArgs<PacketSessionData> e)
         {
+            LastLapPacketCarData = null;
+            CarData = null;
             MaxLaps = e.Packet.TotalLaps;
             NotifyOfPropertyChange("CurrentLap");
         }
