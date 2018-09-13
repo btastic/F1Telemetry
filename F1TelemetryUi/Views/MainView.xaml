@@ -6,19 +6,19 @@
         xmlns:local="clr-namespace:F1TelemetryUi"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
-                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="MainWindow" Top="0" WindowStartupLocation="Manual" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.Resources>
             <Style x:Key="CleanSeparator" TargetType="lvc:Separator">
@@ -40,12 +40,12 @@
             </i:Interaction.Behaviors>
         </TextBlock>
 
-        <lvc:CartesianChart 
-            Grid.Row="2" 
-            Grid.ColumnSpan="4" 
-            Hoverable="False" 
-            DataTooltip="{x:Null}" 
-            DisableAnimations="True" 
+        <lvc:CartesianChart
+            Grid.Row="2"
+            Grid.ColumnSpan="4"
+            Hoverable="False"
+            DataTooltip="{x:Null}"
+            DisableAnimations="True"
             Zoom="X"
             Pan="X"
             Series="{Binding SeriesCollection}">

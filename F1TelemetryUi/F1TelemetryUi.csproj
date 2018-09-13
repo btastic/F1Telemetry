@@ -111,10 +111,14 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="ViewModels\MapViewModel.cs" />
+    <Compile Include="ViewModels\NewMapViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TimingOverlayViewModel.cs" />
     <Compile Include="Views\MapView.xaml.cs">
       <DependentUpon>MapView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewMapView.xaml.cs">
+      <DependentUpon>NewMapView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TimingOverlayView.xaml.cs">
       <DependentUpon>TimingOverlayView.xaml</DependentUpon>
@@ -135,6 +139,10 @@
     <Page Include="Views\MapView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Views\NewMapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\TimingOverlayView.xaml">
       <SubType>Designer</SubType>
@@ -190,6 +198,10 @@
     <ProjectReference Include="..\F1Telemetry\F1Telemetry.csproj">
       <Project>{88F4FDE6-4126-4267-81DF-17AAD97A1465}</Project>
       <Name>F1Telemetry</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WpfTools\WpfTools.csproj">
+      <Project>{f9960e21-c736-4bfe-b213-d8ac9620e1b1}</Project>
+      <Name>WpfTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

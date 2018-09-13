@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Caliburn.Micro;
 using F1Telemetry;
@@ -16,21 +15,6 @@ namespace F1TelemetryUi.ViewModels
         private readonly IWindowManager _windowManager;
 
         private SortedObservableCollection<CarTimingViewModel> _carData = new SortedObservableCollection<CarTimingViewModel>();
-        public SortedObservableCollection<CarTimingViewModel> CarData
-        {
-            get
-            {
-                _carData.Sort(p => p.CarPosition);
-                return _carData;
-            }
-            set
-            {
-                _carData = value;
-                NotifyOfPropertyChange("CarData");
-            }
-        }
-
-        public List<CarTimingViewModel> LastLapPacketCarData { get; private set; } = new List<CarTimingViewModel>();
 
         public TimingOverlayViewModel(IWindowManager windowManager,
             IEventAggregator eventAggregator,
@@ -45,9 +29,61 @@ namespace F1TelemetryUi.ViewModels
             _f1Manager.CarStatusReceived += _f1Manager_CarStatusReceived;
         }
 
+        public SortedObservableCollection<CarTimingViewModel> CarData
+        {
+            get
+            {
+                _carData.Sort(p => p.CarPosition);
+                return _carData;
+            }
+
+            set
+            {
+                _carData = value;
+                NotifyOfPropertyChange("CarData");
+            }
+        }
+
+        public List<CarTimingViewModel> LastLapPacketCarData { get; private set; } = new List<CarTimingViewModel>();
+
         private void _f1Manager_CarStatusReceived(object sender, PacketReceivedEventArgs<PacketCarStatusData> e)
         {
             UpdateCarGrid(e.Packet);
+        }
+
+        private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<PacketCarTelemetryData> e)
+        {
+            UpdateCarGrid(e.Packet);
+        }
+
+        private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<PacketLapData> e)
+        {
+            CollectCarGrid(e.Packet);
+            UpdateCarGrid(e.Packet);
+        }
+
+        private void CollectCarGrid(PacketLapData packetLapData)
+        {
+            if (LastLapPacketCarData != null && LastLapPacketCarData.Count > 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < packetLapData.LapData.Length; i++)
+            {
+                if (packetLapData.LapData[i].Equals(default(LapData)))
+                {
+                    // don't add cars that don't have a value
+                    continue;
+                }
+
+                LastLapPacketCarData.Add(new CarTimingViewModel
+                {
+                    CarIndex = i,
+                });
+            }
+
+            CarData = new SortedObservableCollection<CarTimingViewModel>(LastLapPacketCarData);
         }
 
         private void UpdateCarGrid(PacketCarStatusData packet)
@@ -63,11 +99,6 @@ namespace F1TelemetryUi.ViewModels
             }
 
             NotifyOfPropertyChange("CarData");
-        }
-
-        private void _f1Manager_CarTelemetryReceived(object sender, PacketReceivedEventArgs<PacketCarTelemetryData> e)
-        {
-            UpdateCarGrid(e.Packet);
         }
 
         private void UpdateCarGrid(PacketCarTelemetryData packet)
@@ -105,36 +136,6 @@ namespace F1TelemetryUi.ViewModels
             }
 
             NotifyOfPropertyChange("CarData");
-        }
-
-        private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<PacketLapData> e)
-        {
-            CollectCarGrid(e.Packet);
-            UpdateCarGrid(e.Packet);
-        }
-
-        private void CollectCarGrid(PacketLapData packetLapData)
-        {
-            if (LastLapPacketCarData != null && LastLapPacketCarData.Count > 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i < packetLapData.LapData.Length; i++)
-            {
-                if (packetLapData.LapData[i].Equals(default(LapData)))
-                {
-                    // don't add cars that don't have a value
-                    continue;
-                }
-
-                LastLapPacketCarData.Add(new CarTimingViewModel
-                {
-                    CarIndex = i,
-                });
-            }
-
-            CarData = new SortedObservableCollection<CarTimingViewModel>(LastLapPacketCarData);
         }
 
         private void UpdateCarGrid(PacketLapData packetLapData)

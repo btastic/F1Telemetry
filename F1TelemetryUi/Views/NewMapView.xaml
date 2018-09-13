@@ -1,0 +1,27 @@
+﻿<controls:MetroWindow x:Class="F1TelemetryUi.Views.NewMapView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:F1TelemetryUi.Views"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:wpftools="clr-namespace:WpfTools;assembly=WpfTools"
+        mc:Ignorable="d"
+        Title="NewMapView" Height="500" Width="500">
+    <Viewbox>
+        <Grid>
+            <Image Source="/F1TelemetryUi;component/Resources/Silverstone.png" />
+            <Path Data="{Binding Drawings[0].Geometry}"
+                              Fill="{Binding Drawings[0].Fill}"
+                              Stroke="{Binding Drawings[0].Stroke}"
+                              StrokeThickness="{Binding Drawings[0].StrokeThickness}">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="{Binding Drawings[0].ScaleX}" ScaleY="{Binding Drawings[0].ScaleY}"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+        </Grid>
+    </Viewbox>
+</controls:MetroWindow>
