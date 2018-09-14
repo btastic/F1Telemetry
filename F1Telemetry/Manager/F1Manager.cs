@@ -12,7 +12,7 @@ namespace F1Telemetry.Manager
         public F1Manager(TelemetryManager telemetryManager)
         {
             _telemetryManager = telemetryManager;
-            UpdateInterval = 500;
+            UpdateInterval = 300;
             _telemetryManager.CarStatusPacketReceived += _telemetryManager_CarStatusPacketReceived;
             _telemetryManager.CarTelemetryPacketReceived += _telemetryManager_CarTelemetryPacketReceived;
             _telemetryManager.LapPacketReceived += _telemetryManager_LapPacketReceived;

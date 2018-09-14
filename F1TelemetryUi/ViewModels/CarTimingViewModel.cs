@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.Collections.Generic;
+using Caliburn.Micro;
 using F1Telemetry.Models.Raw.F12018;
 
 namespace F1TelemetryUi.ViewModels
@@ -38,13 +40,6 @@ namespace F1TelemetryUi.ViewModels
         {
             get { return _isPlayer; }
             set { _isPlayer = value; NotifyOfPropertyChange(); }
-        }
-
-        private string _timeDistanceCarBehind;
-        public string TimeDistanceCarBehind
-        {
-            get { return _timeDistanceCarBehind; }
-            set { _timeDistanceCarBehind = value; NotifyOfPropertyChange(); }
         }
 
         private string _timeDistanceCarAhead;
@@ -93,6 +88,23 @@ namespace F1TelemetryUi.ViewModels
         {
             get { return _team; }
             set { _team = value; NotifyOfPropertyChange(); }
+        }
+
+        // Dictionary 1 = Lap & Dictionary 2
+        // Dictionary 2 = Sector & Time
+        private Dictionary<int, Dictionary<int, TimeSpan>> _sectorTimes = new Dictionary<int, Dictionary<int, TimeSpan>>();
+
+        public Dictionary<int, Dictionary<int, TimeSpan>> SectorTimes
+        {
+            get { return _sectorTimes; }
+            set { _sectorTimes = value; NotifyOfPropertyChange(); }
+        }
+
+        private int _currentSector;
+        public int CurrentSector
+        {
+            get { return _currentSector; }
+            set { _currentSector = value; NotifyOfPropertyChange(); }
         }
     }
 }

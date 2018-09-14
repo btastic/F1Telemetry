@@ -112,6 +112,7 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="ViewModels\NewMapViewModel.cs" />
+    <Compile Include="ViewModels\SectorTimes.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TimingOverlayViewModel.cs" />
     <Compile Include="Views\NewMapView.xaml.cs">

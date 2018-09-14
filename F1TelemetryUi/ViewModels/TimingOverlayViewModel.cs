@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Caliburn.Micro;
-using F1Telemetry;
 using F1Telemetry.Events;
 using F1Telemetry.Manager;
 using F1Telemetry.Models.Raw.F12018;
@@ -14,6 +13,7 @@ namespace F1TelemetryUi.ViewModels
     public class TimingOverlayViewModel : PropertyChangedBase, IShell
     {
         private SortedObservableCollection<CarTimingViewModel> _carData = new SortedObservableCollection<CarTimingViewModel>();
+        private Dictionary<int, float> _trackSectors = new Dictionary<int, float>();
 
         public TimingOverlayViewModel(IWindowManager windowManager,
             IEventAggregator eventAggregator,
@@ -57,15 +57,46 @@ namespace F1TelemetryUi.ViewModels
 
         private void _f1Manager_SessionChanged(object sender, PacketReceivedEventArgs<PacketSessionData> e)
         {
-            UpdateSession(e);
+            NewSession();
+        }
+
+        private void NewSession()
+        {
+            LastLapPacketCarData.Clear();
+            NotifyOfPropertyChange("CarData");
         }
 
         private void UpdateSession(PacketReceivedEventArgs<PacketSessionData> e)
         {
-            LastLapPacketCarData = null;
-            CarData = null;
             MaxLaps = e.Packet.TotalLaps;
+
+            CalculateTrackSectors(e.Packet.TrackLength);
             NotifyOfPropertyChange("CurrentLap");
+        }
+
+        private void CalculateTrackSectors(ushort trackLength)
+        {
+            if (trackLength == 0)
+            {
+                return;
+            }
+
+            if (_trackSectors.Count > 0)
+            {
+                return;
+            }
+
+            var sectorCount = 1000;
+            var sectorLength = trackLength / (float)sectorCount;
+
+            var dict = new Dictionary<int, float>();
+
+            for (int i = 0; i < sectorCount; i++)
+            {
+                dict.Add(i + 1, sectorLength * i);
+            }
+
+            _trackSectors = dict;
         }
 
         public SortedObservableCollection<CarTimingViewModel> CarData
@@ -128,6 +159,60 @@ namespace F1TelemetryUi.ViewModels
         {
             CollectCarGrid(e.Packet);
             UpdateCarGrid(e.Packet);
+            CalculateCarSectors(e.Packet);
+        }
+
+        private void CalculateCarSectors(PacketLapData packet)
+        {
+            if (LastLapPacketCarData == null && LastLapPacketCarData.Count == 0)
+            {
+                return;
+            }
+
+            if (_trackSectors.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < LastLapPacketCarData.Count; i++)
+            {
+                var sectorIndex = FindSectorIndexByLapDistance(packet.LapData[i].LapDistance);
+
+                if (sectorIndex == -1)
+                {
+                    continue;
+                }
+
+                LastLapPacketCarData[i].CurrentSector = sectorIndex;
+
+                if (!LastLapPacketCarData[i].SectorTimes.ContainsKey(packet.LapData[i].CurrentLapNum))
+                {
+                    LastLapPacketCarData[i]
+                        .SectorTimes.Add(packet.LapData[i].CurrentLapNum, new Dictionary<int, TimeSpan>());
+                }
+
+                if (!LastLapPacketCarData[i].SectorTimes[packet.LapData[i].CurrentLapNum].ContainsKey(sectorIndex))
+                {
+                    LastLapPacketCarData[i]
+                        .SectorTimes[packet.LapData[i].CurrentLapNum]
+                            .Add(sectorIndex, TimeSpan.FromSeconds(packet.Header.SessionTime));
+                }
+                else
+                {
+                    LastLapPacketCarData[i]
+                        .SectorTimes[packet.LapData[i].CurrentLapNum][sectorIndex] = TimeSpan.FromSeconds(packet.Header.SessionTime);
+                }
+            }
+        }
+
+        private int FindSectorIndexByLapDistance(float lapDistance)
+        {
+            if (_trackSectors.Count == 0 || lapDistance < 0)
+            {
+                return -1;
+            }
+
+            return _trackSectors.Last(x => lapDistance > x.Value).Key;
         }
 
         private void CollectCarGrid(PacketLapData packetLapData)
@@ -178,29 +263,42 @@ namespace F1TelemetryUi.ViewModels
 
             for (int i = 0; i < LastLapPacketCarData.Count; i++)
             {
-                LastLapPacketCarData[i].Speed = packet.CarTelemetryData[i].Speed * (5.0f / 18.0f);
-            }
-
-            for (int i = 0; i < LastLapPacketCarData.Count; i++)
-            {
                 CarTimingViewModel currentCar = LastLapPacketCarData[i];
                 CarTimingViewModel carInFront = LastLapPacketCarData.SingleOrDefault(x => x.CarPosition == currentCar.CarPosition - 1);
-                CarTimingViewModel carBehind = LastLapPacketCarData.SingleOrDefault(x => x.CarPosition == currentCar.CarPosition + 1);
 
-                if (currentCar.Distance <= 0 && carInFront?.Distance <= 0 && carBehind?.Distance <= 0)
+                if (currentCar.Distance <= 0 && carInFront?.Distance <= 0)
                 {
                     continue;
                 }
 
-                LastLapPacketCarData[i].TimeDistanceCarAhead =
-                    carInFront == null
-                    ? "Interval"
-                    : "+ " + TimeSpan.FromSeconds((carInFront.Distance - currentCar.Distance) / Math.Max(currentCar.Speed, .1f)).ToString("s\\.fff");
+                if (carInFront == null)
+                {
+                    LastLapPacketCarData[i].TimeDistanceCarAhead = "Interval";
+                    continue;
+                }
 
-                LastLapPacketCarData[i].TimeDistanceCarBehind =
-                    carBehind == null
-                    ? TimeSpan.Zero.ToString("s\\.fff")
-                    : "+ " + TimeSpan.FromSeconds((currentCar.Distance - carBehind.Distance) / Math.Max(carBehind.Speed, .1f)).ToString("s\\.fff");
+                if (currentCar.SectorTimes.Count == 0)
+                {
+                    continue;
+                }
+
+                if(!carInFront.SectorTimes.ContainsKey(currentCar.CurrentLap))
+                {
+                    continue;
+                }
+                // the current car does not have the sector of the car that is in front
+                if (!carInFront.SectorTimes[currentCar.CurrentLap].ContainsKey(currentCar.CurrentSector))
+                {
+                    continue;
+                }
+                // take the front cars sector times and compare it to the car behinds sector
+                // the car in front was definitely already in this sector
+
+                var carInFrontTimeStamp = carInFront.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
+                var currentCarTimeStamp = currentCar.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
+
+                LastLapPacketCarData[i].TimeDistanceCarAhead =
+                    "+ " + (currentCarTimeStamp - carInFrontTimeStamp).Duration().ToString("s\\.fff");
             }
 
             NotifyOfPropertyChange("CarData");
