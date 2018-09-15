@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Caliburn.Micro;
 using F1Telemetry.Events;
@@ -157,7 +156,7 @@ namespace F1TelemetryUi.ViewModels
 
         private void _f1Manager_LapPacketReceived(object sender, PacketReceivedEventArgs<PacketLapData> e)
         {
-            CollectCarGrid(e.Packet);
+            InitializeCarGrid(e.Packet);
             UpdateCarGrid(e.Packet);
             CalculateCarSectors(e.Packet);
         }
@@ -212,10 +211,10 @@ namespace F1TelemetryUi.ViewModels
                 return -1;
             }
 
-            return _trackSectors.Last(x => lapDistance > x.Value).Key;
+            return _trackSectors.Last(x => lapDistance >= x.Value).Key;
         }
 
-        private void CollectCarGrid(PacketLapData packetLapData)
+        private void InitializeCarGrid(PacketLapData packetLapData)
         {
             if (LastLapPacketCarData != null && LastLapPacketCarData.Count > 0)
             {
@@ -254,13 +253,20 @@ namespace F1TelemetryUi.ViewModels
             NotifyOfPropertyChange("CarData");
         }
 
-        private void UpdateCarGrid(PacketCarTelemetryData packet)
+        private void UpdateCarGrid(PacketCarTelemetryData e)
         {
             if (LastLapPacketCarData == null || LastLapPacketCarData.Count == 0)
             {
                 return;
             }
 
+            CalculateCarDeltas();
+
+            NotifyOfPropertyChange("CarData");
+        }
+
+        private void CalculateCarDeltas()
+        {
             for (int i = 0; i < LastLapPacketCarData.Count; i++)
             {
                 CarTimingViewModel currentCar = LastLapPacketCarData[i];
@@ -282,7 +288,7 @@ namespace F1TelemetryUi.ViewModels
                     continue;
                 }
 
-                if(!carInFront.SectorTimes.ContainsKey(currentCar.CurrentLap))
+                if (!carInFront.SectorTimes.ContainsKey(currentCar.CurrentLap))
                 {
                     continue;
                 }
@@ -294,14 +300,12 @@ namespace F1TelemetryUi.ViewModels
                 // take the front cars sector times and compare it to the car behinds sector
                 // the car in front was definitely already in this sector
 
-                var carInFrontTimeStamp = carInFront.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
-                var currentCarTimeStamp = currentCar.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
+                TimeSpan carInFrontTimeStamp = carInFront.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
+                TimeSpan currentCarTimeStamp = currentCar.SectorTimes[currentCar.CurrentLap][currentCar.CurrentSector];
 
                 LastLapPacketCarData[i].TimeDistanceCarAhead =
                     "+ " + (currentCarTimeStamp - carInFrontTimeStamp).Duration().ToString("s\\.fff");
             }
-
-            NotifyOfPropertyChange("CarData");
         }
 
         private void UpdateCarGrid(PacketLapData packetLapData)

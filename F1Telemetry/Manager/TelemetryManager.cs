@@ -224,7 +224,7 @@ namespace F1Telemetry.Manager
                     _udpClient = new UdpClient();
                     _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                     _udpClient.ExclusiveAddressUse = false;
-                    IPEndPoint localEP = new IPEndPoint(IPAddress.Any, port);
+                    var localEP = new IPEndPoint(IPAddress.Any, port);
                     _udpClient.Client.Bind(localEP);
                 }
             }
