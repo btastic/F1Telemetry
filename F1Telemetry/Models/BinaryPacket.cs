@@ -8,19 +8,18 @@ namespace F1Telemetry
     public class BinaryPacket
     {
         public readonly PacketHeader PacketHeader;
-        public readonly TimeSpan TimeSpan;
+        public readonly uint FrameIdentifier;
 
         public byte[] Data { get; set; }
 
         [SerializationConstructor]
         public BinaryPacket(
             PacketHeader packetHeader,
-            byte[] data,
-            TimeSpan timeSpan)
+            byte[] data)
         {
             PacketHeader = packetHeader;
             Data = data;
-            TimeSpan = timeSpan;
+            FrameIdentifier = packetHeader.FrameIdentifier;
         }
     }
 }

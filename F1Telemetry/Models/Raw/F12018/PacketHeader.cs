@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using MessagePack;
 
 namespace F1Telemetry.Models.Raw.F12018
@@ -26,7 +25,7 @@ namespace F1Telemetry.Models.Raw.F12018
         /// <summary>
         /// Unique identifier for the session
         /// </summary>
-        public UInt64 SessionUId;
+        public ulong SessionUId;
 
         /// <summary>
         /// Session timestamp

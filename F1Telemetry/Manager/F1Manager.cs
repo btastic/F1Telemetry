@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using F1Telemetry.Events;
 using F1Telemetry.Models.Raw.F12018;
 
@@ -12,7 +13,7 @@ namespace F1Telemetry.Manager
         public F1Manager(TelemetryManager telemetryManager)
         {
             _telemetryManager = telemetryManager;
-            UpdateInterval = 300;
+            UpdateInterval = 100;
             _telemetryManager.CarStatusPacketReceived += _telemetryManager_CarStatusPacketReceived;
             _telemetryManager.CarTelemetryPacketReceived += _telemetryManager_CarTelemetryPacketReceived;
             _telemetryManager.LapPacketReceived += _telemetryManager_LapPacketReceived;
@@ -108,8 +109,8 @@ namespace F1Telemetry.Manager
 
         private void CheckLapChanged(PacketReceivedEventArgs<PacketLapData> e)
         {
-            var oldLapNum = e.OldPacket.LapData[e.OldPacket.Header.PlayerCarIndex].CurrentLapNum;
-            var currentLapNum = e.Packet.LapData[e.Packet.Header.PlayerCarIndex].CurrentLapNum;
+            var oldLapNum = e.OldPacket.LapData.Single(x => x.CarPosition == 1).CurrentLapNum;
+            var currentLapNum = e.Packet.LapData.Single(x => x.CarPosition == 1).CurrentLapNum;
 
             if (currentLapNum > oldLapNum)
             {

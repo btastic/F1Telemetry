@@ -43,7 +43,7 @@ namespace F1Telemetry.Manager
                 return;
             }
 
-            _queue.Enqueue(new BinaryPacket(packet, bytes, TimeSpan.FromSeconds(packet.SessionTime)));
+            _queue.Enqueue(new BinaryPacket(packet, bytes));
         }
 
         public void Start()
