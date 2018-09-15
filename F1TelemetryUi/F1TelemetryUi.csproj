@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>F1TelemetryUi</RootNamespace>
     <AssemblyName>F1TelemetryUi</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -192,6 +192,10 @@
     <ProjectReference Include="..\F1Telemetry\F1Telemetry.csproj">
       <Project>{88F4FDE6-4126-4267-81DF-17AAD97A1465}</Project>
       <Name>F1Telemetry</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SciChart.Wpf.UI\SciChart.Wpf.UI.Transitionz\SciChart.Wpf.UI.Transitionz.csproj">
+      <Project>{f62bdb9c-0304-46d3-b088-62da495b46dd}</Project>
+      <Name>SciChart.Wpf.UI.Transitionz</Name>
     </ProjectReference>
     <ProjectReference Include="..\WpfTools\WpfTools.csproj">
       <Project>{f9960e21-c736-4bfe-b213-d8ac9620e1b1}</Project>
