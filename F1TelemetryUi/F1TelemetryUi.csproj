@@ -66,6 +66,9 @@
     <Reference Include="PanAndZoom, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\PanAndZoom.1.0.1\lib\net45\PanAndZoom.dll</HintPath>
     </Reference>
+    <Reference Include="SciChart.Wpf.UI.Transitionz, Version=2.0.38.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SciChart.Wpf.UI.Transitionz.2.0.38\lib\net46\SciChart.Wpf.UI.Transitionz.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -170,7 +173,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -186,16 +191,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\F1Telemetry\F1Telemetry.csproj">
       <Project>{88F4FDE6-4126-4267-81DF-17AAD97A1465}</Project>
       <Name>F1Telemetry</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SciChart.Wpf.UI\SciChart.Wpf.UI.Transitionz\SciChart.Wpf.UI.Transitionz.csproj">
-      <Project>{f62bdb9c-0304-46d3-b088-62da495b46dd}</Project>
-      <Name>SciChart.Wpf.UI.Transitionz</Name>
     </ProjectReference>
     <ProjectReference Include="..\WpfTools\WpfTools.csproj">
       <Project>{f9960e21-c736-4bfe-b213-d8ac9620e1b1}</Project>

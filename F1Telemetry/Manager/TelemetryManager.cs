@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+
 using F1Telemetry.Events;
 using F1Telemetry.Models.Raw.F12018;
 
@@ -105,57 +106,6 @@ namespace F1Telemetry.Manager
             _disposed = true;
         }
 
-        private void OnCarSetupPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
-        {
-            CarSetupPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnCarStatusPacketReceived(PacketReceivedEventArgs<PacketCarStatusData> e)
-        {
-            CarStatusPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnCarTelemetryPacketReceived(PacketReceivedEventArgs<PacketCarTelemetryData> e)
-        {
-            CarTelemetryPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnEventPacketReceived(PacketReceivedEventArgs<EventPacket> e)
-        {
-            EventPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnLapPacketReceivedReceived(PacketReceivedEventArgs<PacketLapData> e)
-        {
-            LapPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnMotionPacketReceived(PacketReceivedEventArgs<PacketMotionData> e)
-        {
-            MotionPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
-        {
-            ParticipantsPacketReceived?.Invoke(this, e);
-        }
-
-        private void OnSessionChanged(PacketReceivedEventArgs<PacketSessionData> e)
-        {
-            SessionChanged?.Invoke(this, e);
-        }
-
-        private void OnSessionPacketReceived(PacketReceivedEventArgs<PacketSessionData> e)
-        {
-            if ((_oldSessionId != 0 && e.Packet.PacketHeader.SessionUId != _oldSessionId) ||
-                e.Packet.PacketHeader.FrameIdentifier < _oldFrameIdentifier)
-            {
-                OnSessionChanged(e);
-            }
-
-            SessionPacketReceived?.Invoke(this, e);
-        }
-
         private void HandlePacket(PacketHeader packet, byte[] bytes)
         {
             _telemetryRecorder.RecordPacket(packet, bytes);
@@ -232,6 +182,57 @@ namespace F1Telemetry.Manager
             {
                 _udpClient = null;
             }
+        }
+
+        private void OnCarSetupPacketReceived(PacketReceivedEventArgs<PacketCarSetupData> e)
+        {
+            CarSetupPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnCarStatusPacketReceived(PacketReceivedEventArgs<PacketCarStatusData> e)
+        {
+            CarStatusPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnCarTelemetryPacketReceived(PacketReceivedEventArgs<PacketCarTelemetryData> e)
+        {
+            CarTelemetryPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnEventPacketReceived(PacketReceivedEventArgs<EventPacket> e)
+        {
+            EventPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnLapPacketReceivedReceived(PacketReceivedEventArgs<PacketLapData> e)
+        {
+            LapPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnMotionPacketReceived(PacketReceivedEventArgs<PacketMotionData> e)
+        {
+            MotionPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnParticipantsPacketReceived(PacketReceivedEventArgs<PacketParticipantsData> e)
+        {
+            ParticipantsPacketReceived?.Invoke(this, e);
+        }
+
+        private void OnSessionChanged(PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            SessionChanged?.Invoke(this, e);
+        }
+
+        private void OnSessionPacketReceived(PacketReceivedEventArgs<PacketSessionData> e)
+        {
+            if ((_oldSessionId != 0 && e.Packet.PacketHeader.SessionUId != _oldSessionId) ||
+                e.Packet.PacketHeader.FrameIdentifier < _oldFrameIdentifier)
+            {
+                OnSessionChanged(e);
+            }
+
+            SessionPacketReceived?.Invoke(this, e);
         }
 
         private void UdpLoop()
