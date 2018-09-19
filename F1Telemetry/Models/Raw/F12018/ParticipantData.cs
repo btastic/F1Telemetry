@@ -6,8 +6,13 @@ namespace F1Telemetry.Models.Raw.F12018
 {
     public static class ParticipantDataExtensions
     {
-        public static string GetThreeLetterName(this ParticipantData participantData)
+        public static string GetThreeLetterName(this ParticipantData participantData, bool isOnlineRace)
         {
+            if (isOnlineRace)
+            {
+                return Encoding.UTF8.GetString(participantData.Name);
+            }
+
             switch (participantData.Driver)
             {
                 case Driver.CarlosSainz:

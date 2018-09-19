@@ -42,7 +42,7 @@ namespace F1TelemetryUi.ViewModels
 
             for (int i = 0; i < LastLapPacketCarData.Count; i++)
             {
-                LastLapPacketCarData[i].Name = e.Packet.Participants[i].GetThreeLetterName();
+                LastLapPacketCarData[i].Name = e.Packet.Participants[i].GetThreeLetterName(_onlineSession);
                 LastLapPacketCarData[i].Team = e.Packet.Participants[i].Team;
             }
 
@@ -68,7 +68,7 @@ namespace F1TelemetryUi.ViewModels
         private void UpdateSession(PacketReceivedEventArgs<PacketSessionData> e)
         {
             MaxLaps = e.Packet.TotalLaps;
-
+            _onlineSession = e.Packet.NetworkGame == NetworkGame.Online;
             CalculateTrackSectors(e.Packet.TrackLength);
             NotifyOfPropertyChange(() => CurrentLap);
         }
@@ -85,7 +85,7 @@ namespace F1TelemetryUi.ViewModels
                 return;
             }
 
-            var sectorCount = 1000;
+            var sectorCount = trackLength * 5;
             var sectorLength = trackLength / (float)sectorCount;
 
             var dict = new Dictionary<int, float>();
@@ -155,6 +155,7 @@ namespace F1TelemetryUi.ViewModels
             }
         }
 
+        private bool _onlineSession;
 
         public List<CarTimingViewModel> LastLapPacketCarData { get; private set; } = new List<CarTimingViewModel>();
 
@@ -189,8 +190,18 @@ namespace F1TelemetryUi.ViewModels
 
             for (int i = 0; i < LastLapPacketCarData.Count; i++)
             {
-                var sectorIndex = FindSectorIndexByLapDistance(packet.LapData[i].LapDistance);
+                if (LastLapPacketCarData[i] == null)
+                {
+                    continue;
+                }
 
+                if (packet.LapData[i].Equals(default(LapData)))
+                {
+                    continue;
+                }
+
+                var sectorIndex = FindSectorIndexByLapDistance(packet.LapData[i].LapDistance);
+                                
                 if (sectorIndex == -1)
                 {
                     continue;
@@ -230,6 +241,7 @@ namespace F1TelemetryUi.ViewModels
 
         private void InitializeCarGrid(PacketLapData packetLapData)
         {
+            DetectGridChanges(packetLapData);
             if (LastLapPacketCarData != null && LastLapPacketCarData.Count > 0)
             {
                 return;
@@ -250,6 +262,23 @@ namespace F1TelemetryUi.ViewModels
             }
 
             CarData = new SortedObservableCollection<CarTimingViewModel>(LastLapPacketCarData);
+        }
+
+        private void DetectGridChanges(PacketLapData packetLapData)
+        {
+            int validCount = 0;
+            foreach (LapData item in packetLapData.LapData)
+            {
+                if (!item.Equals(default(LapData)))
+                {
+                    validCount++;
+                }
+            }
+
+            if (validCount != LastLapPacketCarData.Count)
+            {
+                LastLapPacketCarData.Clear();
+            }
         }
 
         private void UpdateCarGrid(PacketCarStatusData packet)
@@ -273,7 +302,7 @@ namespace F1TelemetryUi.ViewModels
             {
                 return;
             }
-            
+
             NotifyOfPropertyChange(() => CarData);
         }
 
@@ -325,7 +354,7 @@ namespace F1TelemetryUi.ViewModels
                     bestSectorCarInFront = deltaSectorsCarInFront.LastOrDefault(x => x.Key < currentCar.CurrentDeltaSector);
                     bestSectorCurrentCar = deltaSectorsCurrentCar.FirstOrDefault(x => x.Key > bestSectorCarInFront.Key);
 
-                    if (bestSectorCurrentCar.Value == default(TimeSpan) 
+                    if (bestSectorCurrentCar.Value == default(TimeSpan)
                         || bestSectorCarInFront.Value == default(TimeSpan))
                     {
                         return;
@@ -342,6 +371,10 @@ namespace F1TelemetryUi.ViewModels
                 // take the front cars sector times and compare it to the car behinds sector
                 // the car in front was definitely already in this sector
 
+                if (carInFrontTimeStamp == currentCarTimeStamp)
+                {
+                    ;
+                }
                 LastLapPacketCarData[i].TimeDistanceCarAhead =
                     "+ " + (currentCarTimeStamp - carInFrontTimeStamp).Duration().ToString("s\\.fff");
 
